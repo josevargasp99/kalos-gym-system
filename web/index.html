@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Kalos · Verificación</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#000000">
+  <link rel="preload" as="image" href="isotipo-splash.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Kalos Workout">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0D1708; --panel:#121e0d; --line:#24321e; --sage:#8A9686;
+      --ok:#62D97E; --warn:#F2B33D; --bad:#FF5A5A; --neutral:#8A9686;
+      --text:#ffffff; --muted:#8A9686;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif;min-height:100%}
+    body{display:flex;justify-content:center;min-height:100vh}
+    .wrap{width:100%;max-width:440px;padding:28px 16px 32px;
+      background:radial-gradient(120% 60% at 50% 0%, rgba(138,150,134,.14), transparent 60%)}
+    .brand{margin:4px 0 26px}
+    .brand img{width:150px;height:auto;display:block}
+
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px 20px 20px;position:relative;overflow:hidden}
+    .card:before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--c);box-shadow:0 0 18px var(--c)}
+    .ok{--c:var(--ok)} .warn{--c:var(--warn)} .bad{--c:var(--bad)} .neutral{--c:var(--neutral)}
+
+    .status{display:inline-flex;align-items:center;gap:10px;font-family:'Bebas Neue',Impact,sans-serif;
+      font-size:30px;letter-spacing:2px;color:var(--c);line-height:1;text-shadow:0 0 16px var(--c)}
+    .dot{width:12px;height:12px;border-radius:50%;background:var(--c);box-shadow:0 0 12px var(--c);animation:pulse 1.4s infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
+
+    .name{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;font-size:44px;line-height:.95;letter-spacing:1px;margin:18px 0 6px;word-break:break-word}
+    .days{color:var(--muted);font-size:14px}
+    .bar{height:6px;background:#22301c;border-radius:6px;margin:14px 0 20px;overflow:hidden}
+    .bar span{display:block;height:100%;width:0;background:var(--c);border-radius:6px;transition:width .8s ease}
+
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;border-top:1px solid var(--line);padding-top:18px}
+    .grid dt{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+    .grid dd{font-size:15px;font-weight:500;word-break:break-word}
+    .full{grid-column:1/-1}
+    .code{font-family:ui-monospace,Menlo,monospace;letter-spacing:1px;color:var(--muted)}
+
+    .fdesc{margin:14px 0 0;padding:12px 14px;border:1px solid var(--ok);border-radius:12px;background:#0a1206}
+    .fdesc b{display:block;color:var(--ok);font-size:15px}
+    .fdesc span{display:block;margin-top:4px;color:#fff;font-size:14px;line-height:1.4}
+    .fcar{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:14px -4px 0;padding:0 4px 6px;-webkit-overflow-scrolling:touch}
+    .fcar img{flex:0 0 82%;width:82%;max-width:340px;aspect-ratio:4/5;object-fit:cover;border-radius:12px;scroll-snap-align:center;border:1px solid var(--line);background:#0a1206;cursor:zoom-in}
+    .fhint{margin:6px 0 0;text-align:center;color:var(--sage);font-size:12px}
+    .fzoom{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.94)}
+    .fzoom button{position:fixed;top:12px;right:12px;z-index:2;width:44px;height:44px;border:0;border-radius:50%;background:#fff;color:#000;font-size:20px;cursor:pointer}
+    .fzs{position:absolute;inset:0;overflow:auto;-webkit-overflow-scrolling:touch;display:flex}
+    .fzs img{margin:auto;max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in}
+    .fzs.z img{max-width:none;max-height:none;width:220%;cursor:zoom-out}
+    .racha{margin:14px 0 4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:#0a1206}
+    .racha.on{border-color:rgba(242,179,61,.5)}
+    .rtop{display:flex;align-items:center;gap:12px}
+    .fuego{font-size:34px;line-height:1}
+    .racha.off .fuego{filter:grayscale(1);opacity:.55}
+    .rnum{font-family:'Bebas Neue',Impact,sans-serif;font-size:40px;line-height:1;letter-spacing:1px}
+    .rlbl{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+    .rrec{margin-left:auto;font-size:12px;color:var(--muted);text-align:right}
+    .rsem{display:flex;gap:6px;margin-top:12px}
+    .rsem span{flex:1;text-align:center;padding:7px 0;border-radius:9px;background:#121e0d;border:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .rsem span.ok{border-color:var(--ok);color:var(--ok)} .rsem span.hoy{border-color:var(--warn);color:var(--warn)}
+    .rsem span.falta{border-color:rgba(255,90,90,.5);color:var(--bad)} .rsem span.feriado{opacity:.5}
+    .rmsg{font-size:13px;line-height:1.5;margin-top:10px;color:var(--text)}
+    .rmsg.riesgo{color:var(--warn)} .rmsg.perdida{color:var(--bad)}
+    .rbtn{display:block;margin-top:10px;padding:12px;border-radius:12px;text-align:center;text-decoration:none;background:#25D366;color:#06210f;font-weight:600;font-size:14px}
+    .msg{color:var(--muted);font-size:14px;line-height:1.5;margin-top:14px}
+    .loading .status{opacity:.7}
+    .clock{margin-top:22px;text-align:center;color:var(--muted);font-size:12px}
+    .clock b{color:var(--text);font-variant-numeric:tabular-nums;font-weight:600}
+    .ig{display:block;text-align:center;margin-top:8px;color:var(--sage);font-size:12px;letter-spacing:1px;text-decoration:none}
+
+    .btn{display:block;width:100%;margin-top:20px;padding:15px 16px;border:0;border-radius:12px;cursor:pointer;
+      font-family:'Bebas Neue',Impact,sans-serif;font-size:22px;letter-spacing:2px;text-align:center;text-decoration:none;
+      background:var(--c);color:#0D1708}
+    .btn.sec{background:transparent;color:var(--sage);border:1px solid var(--line);font-family:Inter,Arial,sans-serif;
+      font-size:13px;letter-spacing:0;margin-top:12px;padding:12px}
+    .btn.out{background:transparent;color:var(--c);border:1.5px solid var(--c);margin-top:20px}
+    .btn.out + .btn{margin-top:12px}
+    .btn:disabled{opacity:.5;cursor:default}
+    textarea{width:100%;min-height:150px;margin-top:16px;padding:14px;border-radius:12px;border:1px solid var(--line);
+      background:#0a1206;color:var(--text);font:16px/1.45 Inter,Arial,sans-serif;resize:vertical}
+    textarea:focus{outline:2px solid var(--sage);border-color:transparent}
+    .count{text-align:right;color:var(--muted);font-size:12px;margin-top:6px}
+    .aviso{margin-top:12px;font-size:14px;line-height:1.5;min-height:20px}
+    .aviso.bad{color:var(--bad)} .aviso.ok{color:var(--ok)}
+    .btn.wa{background:#25D366;color:#06210f}
+    .qrbox{background:#fff;border-radius:14px;padding:12px;margin:18px auto 0;width:min(100%,300px)}
+    .qrbox img{display:block;width:100%;height:auto}
+    .pago h2{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;font-size:34px;letter-spacing:1px;margin:14px 0 0;line-height:1}
+
+    /* Logros */
+    .lgprog{display:flex;justify-content:space-between;align-items:baseline;margin-top:18px;font-size:14px;color:var(--muted)}
+    .lgprog b{color:var(--text);font-size:15px}
+    .lgtotal{margin-top:6px;font-size:13px;color:var(--sage)}
+    ul.lgs{list-style:none;margin:18px 0 0;display:flex;flex-direction:column;gap:8px}
+    li.lg{display:flex;align-items:center;gap:10px;background:#0a1206;border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+    li.lg.hecho{border-color:rgba(98,217,126,.45);background:rgba(98,217,126,.07)}
+    li.lg .tx{flex:1;font-size:15px;line-height:1.35;word-break:break-word}
+    li.lg.hecho .tx{color:#d9f7e1}
+    li.lg .fch{font-size:11px;color:var(--muted);white-space:nowrap}
+    li.lg button{background:none;border:0;color:var(--text);cursor:pointer;font-size:22px;line-height:1;padding:6px;border-radius:8px}
+    li.lg button.ed{font-size:16px;opacity:.7}
+    li.lg button:disabled{cursor:default;opacity:.6}
+    li.lg input{flex:1;min-width:0;padding:10px;border-radius:8px;border:1px solid var(--sage);background:#0a1206;color:var(--text);font:15px Inter,Arial,sans-serif}
+    .lginp{width:100%;margin-top:10px;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:#0a1206;color:var(--text);font:16px Inter,Arial,sans-serif}
+    .lginp:focus{outline:2px solid var(--sage);border-color:transparent}
+    .apf{display:block;margin-top:12px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+    select.lginp{appearance:none;-webkit-appearance:none}
+    .apit{display:block;width:100%;text-align:left;margin-top:8px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0a1206;color:var(--text);font:15px Inter,Arial,sans-serif;cursor:pointer}
+    .apit b{display:block;font-size:16px}
+    .apit span{display:block;margin-top:3px;font-size:13px;opacity:.75}
+    .aprow{margin-top:8px;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:#0a1206;font-size:14px;line-height:1.45}
+    .aprow .fe{font-size:12px;opacity:.7}
+    .aprow .in{font-size:16px;font-weight:600;margin-top:2px}
+    .aprow .no{margin-top:4px;opacity:.85;white-space:pre-wrap;word-break:break-word}
+    .aprow .ac{display:flex;gap:8px;margin-top:8px}
+    .aprow .ac button{flex:1;padding:8px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--text);font:13px Inter,Arial,sans-serif;cursor:pointer}
+    details.hist{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+    details.hist summary{cursor:pointer;color:var(--sage);font-size:14px}
+    details.hist h3{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;font-weight:500}
+    #modal{position:fixed;inset:0;z-index:10;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:20px}
+    #modal .box{position:relative;z-index:2;width:100%;max-width:380px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px 22px 20px;text-align:center}
+    #modal .box:before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--ok);box-shadow:0 0 18px var(--ok);border-radius:18px 18px 0 0}
+    #mTitulo{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;font-size:34px;letter-spacing:1px;line-height:1.05}
+    #mTexto{margin-top:12px;color:#d9f7e1;font-size:17px;line-height:1.4;word-break:break-word}
+    #confeti{position:fixed;inset:0;z-index:1;pointer-events:none;width:100%;height:100%}
+    /* Asistencia */
+    .tel{width:100%;margin-top:16px;padding:16px;border-radius:12px;border:1px solid var(--line);background:#0a1206;color:var(--text);
+      font:600 24px Inter,Arial,sans-serif;letter-spacing:2px;text-align:center}
+    .tel:focus{outline:2px solid var(--sage);border-color:transparent}
+    .big{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;font-size:46px;letter-spacing:1px;line-height:1;margin:16px 0 0}
+    .aviso-venc{margin-top:16px;padding:12px 14px;border:1px solid var(--warn);border-radius:12px;color:var(--warn);font-size:14px;line-height:1.45}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}
+    .stats div{background:#0a1206;border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center}
+    .stats b{display:block;font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;font-size:30px;line-height:1;color:var(--ok)}
+    .stats span{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+    .meses{display:flex;flex-direction:column;gap:18px;margin-top:20px}
+    .mes h3{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;font-size:22px;letter-spacing:1.5px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:baseline}
+    .mes h3 small{font-family:Inter,Arial,sans-serif;font-size:12px;letter-spacing:0;color:var(--muted)}
+    .sem,.dias{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+    .sem span{text-align:center;font-size:10px;color:var(--muted);padding-bottom:2px}
+    .dias i{font-style:normal;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:12px;
+      background:#0a1206;border:1px solid var(--line);color:#5e6b5a}
+    .dias i.pasado{color:var(--muted)}
+    .dias i.asist{background:var(--ok);border-color:var(--ok);color:#0D1708;font-weight:700}
+    .dias i.hoy{box-shadow:0 0 0 2px var(--sage)}
+    .dias i.vacio{background:none;border:0}
+    .selmes{display:flex;gap:8px;margin-top:18px;align-items:stretch}
+    .selmes button{width:48px;flex:none;border:1px solid var(--line);background:#0a1206;color:var(--text);border-radius:12px;font-size:24px;cursor:pointer}
+    .selmes button:disabled{opacity:.3;cursor:default}
+    .selmes select{flex:1;min-width:0;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0a1206;color:var(--text);
+      font:600 16px Inter,Arial,sans-serif;text-align:center;text-align-last:center}
+    .selmes select:focus{outline:2px solid var(--sage);border-color:transparent}
+    .meses{margin-top:16px!important;gap:2px!important}
+    .leyenda{display:flex;gap:16px;margin-top:14px;font-size:12px;color:var(--muted)}
+    .leyenda b{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-1px;margin-right:6px}
+    .inst{margin-top:14px;text-align:center}
+    .inst .no{background:none;border:0;color:var(--muted);font:500 12px Inter,Arial,sans-serif;text-decoration:underline;cursor:pointer;margin-top:8px;padding:6px}
+    .cambiar{display:block;margin:18px auto 0;background:none;border:0;color:var(--muted);font:500 12px Inter,Arial,sans-serif;text-decoration:underline;cursor:pointer;padding:6px}
+    .pasos{list-style:none;counter-reset:p;margin-top:16px;text-align:left}
+    .pasos li{counter-increment:p;position:relative;padding:12px 12px 12px 48px;margin-top:10px;border:1px solid var(--line);border-radius:12px;background:#0a1206;font-size:15px;line-height:1.45}
+    .pasos li::before{content:counter(p);position:absolute;left:12px;top:10px;width:26px;height:26px;border-radius:50%;background:var(--ok);color:#06210f;font:700 14px Inter,Arial,sans-serif;display:flex;align-items:center;justify-content:center}
+    .pasos b{color:#fff}
+    .dtabs{display:flex;gap:6px;margin-top:16px}
+    .dtabs button{flex:1;padding:10px 0;border-radius:10px;border:1px solid var(--line);background:#0a1206;color:var(--muted);font:600 14px Inter,Arial,sans-serif;cursor:pointer}
+    .dtabs button.on{background:var(--ok);color:#06210f;border-color:var(--ok)}
+    .dtabs button.hoy:not(.on){border-color:var(--ok);color:var(--ok)}
+    .rimgs{display:grid;gap:12px;margin-top:16px}
+    .rimgs img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#000;cursor:zoom-in}
+    #lbR{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:50;overflow:auto;touch-action:pan-x pan-y pinch-zoom;-webkit-overflow-scrolling:touch}
+    #lbR img{display:block;width:100%;height:auto}
+    #lbRx{position:fixed;top:12px;right:12px;z-index:51;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:22px;cursor:pointer}
+    [hidden]{display:none!important}
+
+    /* ---------- pantalla de inicio (neblina) ---------- */
+    #splash{position:fixed;inset:0;z-index:100;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center}
+    #splash .sp-fog{position:absolute;left:50%;top:50%;width:130vmax;height:130vmax;margin:-65vmax 0 0 -65vmax;border-radius:50%;will-change:transform,opacity;
+      background:radial-gradient(circle,rgba(205,215,205,.30) 0,rgba(205,215,205,.10) 30%,transparent 60%)}
+    #splash .f1{animation:fogA 9s ease-in-out infinite alternate}
+    #splash .f2{animation:fogB 11s ease-in-out infinite alternate;opacity:.8}
+    #splash .f3{animation:fogC 13s ease-in-out infinite alternate;opacity:.6}
+    @keyframes fogA{from{transform:translate3d(-12%,6%,0) scale(.9)}to{transform:translate3d(10%,-6%,0) scale(1.15)}}
+    @keyframes fogB{from{transform:translate3d(14%,10%,0) scale(1.1)}to{transform:translate3d(-10%,-8%,0) scale(.85)}}
+    @keyframes fogC{from{transform:translate3d(0,-12%,0) scale(1)}to{transform:translate3d(-8%,12%,0) scale(1.2)}}
+    #splash .sp-mist{position:absolute;left:50%;top:50%;width:150vmax;height:150vmax;margin:-75vmax 0 0 -75vmax;z-index:3;pointer-events:none;will-change:transform,opacity;
+      background:radial-gradient(circle,rgba(92,101,92,.92) 0,rgba(92,101,92,.78) 20%,rgba(92,101,92,.4) 38%,transparent 58%);
+      animation:mistOut 2.5s cubic-bezier(.4,0,.3,1) .1s forwards}
+    @keyframes mistOut{from{opacity:1;transform:scale(.7)}to{opacity:0;transform:scale(1.7)}}
+    #spBox{position:relative;z-index:2;width:min(58vw,260px);will-change:transform,opacity}
+    #spLogo{width:100%;height:auto;display:block;will-change:transform,opacity,filter;animation:spIn 2.4s cubic-bezier(.2,.7,.2,1) .15s backwards}
+    @keyframes spIn{from{opacity:0;filter:blur(18px);transform:scale(.86)}}
+    #spLogo.latido{animation:spLat 1.6s ease-in-out infinite}
+    @keyframes spLat{0%,100%{transform:scale(1)}9%{transform:scale(1.05)}18%{transform:scale(1)}27%{transform:scale(1.035)}38%{transform:scale(1)}70%{transform:scale(1.01)}}
+    #splash.corto .sp-fog,#splash.corto .sp-mist{display:none}
+    #splash.corto #spLogo{animation:spInC .45s ease-out backwards}
+    @keyframes spInC{from{opacity:0;transform:scale(.92)}}
+    #splash.corto #spLogo.latido{animation:spLatC .9s ease-in-out infinite}
+    @keyframes spLatC{0%,100%{transform:scale(1)}30%{transform:scale(1.045)}60%{transform:scale(1)}}
+    #splash.zoom{opacity:0;transition:opacity .55s ease .3s}
+    #splash.zoom #spBox{transform:scale(14);opacity:0;transition:transform .85s cubic-bezier(.5,0,.8,.4),opacity .6s ease .25s}
+    /* ---------- deslizamiento entre pantallas ---------- */
+    html,body{overflow-x:hidden}
+    .wrap{position:relative;overflow-x:clip}
+    .sl-sale-izq{animation:slOutL .36s cubic-bezier(.4,0,.2,1) forwards}
+    .sl-sale-der{animation:slOutR .36s cubic-bezier(.4,0,.2,1) forwards}
+    .sl-entra-der{animation:slInR .36s cubic-bezier(.2,.8,.2,1) both}
+    .sl-entra-izq{animation:slInL .36s cubic-bezier(.2,.8,.2,1) both}
+    @keyframes slOutL{to{transform:translate3d(-105%,0,0);opacity:.2}}
+    @keyframes slOutR{to{transform:translate3d(105%,0,0);opacity:.2}}
+    @keyframes slInR{from{transform:translate3d(105%,0,0);opacity:.2}}
+    @keyframes slInL{from{transform:translate3d(-105%,0,0);opacity:.2}}
+    .btn:active:not(:disabled){transform:scale(.97);transition:transform .08s}
+    @media (prefers-reduced-motion:reduce){
+      #splash .sp-fog,#splash .sp-mist{display:none}
+      #spLogo{animation:spInC .5s ease-out backwards}
+      #spLogo.latido,#splash.corto #spLogo.latido{animation:none}
+      #splash.zoom #spBox{transform:none;transition:opacity .3s}
+      #splash.zoom{transition:opacity .3s}
+    }
+  </style>
+</head>
+<body>
+<div id="splash" aria-hidden="true">
+  <div class="sp-fog f1"></div><div class="sp-fog f2"></div><div class="sp-fog f3"></div>
+  <div id="spBox"><img id="spLogo" src="isotipo-splash.png" alt=""></div>
+  <div class="sp-mist"></div>
+</div>
+<script src="config.js"></script>
+<script>
+(function () {
+  var sp = document.getElementById('splash'), logo = document.getElementById('spLogo'); if (!sp || !logo) return;
+  var corto = /[?&]puerta(=|&|$)/.test(location.search);
+  var reduce = false; try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  if (corto) sp.className = 'corto';
+  var t0 = Date.now(), entrada = false, pintado = false, hecho = false, avisado = false;
+  window.KALOS_SPLASH = false;
+  // Secuencia: 1) entrada  2) el isotipo late mientras carga  3) cuando todo está listo y termina el latido en curso  4) zoom
+  function cerrar() {
+    if (hecho) return; hecho = true;
+    sp.className = (sp.className ? sp.className + ' ' : '') + 'zoom';
+    var tc = document.querySelector('meta[name="theme-color"]'); if (tc) setTimeout(function () { tc.setAttribute('content', '#0D1708'); }, 500);
+    setTimeout(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); window.KALOS_SPLASH = true; }, reduce ? 450 : 1050);
+  }
+  function intentar() { if (!hecho && entrada && pintado) cerrar(); }
+  logo.addEventListener('animationend', function (e) {
+    if (e.animationName === 'spIn' || e.animationName === 'spInC') {
+      entrada = true; logo.className += ' latido';
+      if (reduce) setTimeout(intentar, Math.max(0, 1200 - (Date.now() - t0)));
+    }
+  });
+  logo.addEventListener('animationiteration', intentar);          // fin de cada latido: si ya está todo listo, hace el zoom
+  window.splashListo = function () {                              // la tarjeta ya llegó: se dibuja detrás y recién entonces se permite el zoom
+    if (avisado) return; avisado = true;
+    var fuentes = (document.fonts && document.fonts.ready) ? Promise.race([document.fonts.ready, new Promise(function (r) { setTimeout(r, 1500); })]) : Promise.resolve();
+    fuentes.then(function () { requestAnimationFrame(function () { requestAnimationFrame(function () { pintado = true; if (reduce) intentar(); }); }); });
+  };
+  setTimeout(function () { window.splashListo(); }, 12000);        // sin respuesta: entra igual y muestra "Sin conexión"
+  setTimeout(function () { entrada = true; pintado = true; cerrar(); }, 16000);   // seguro absoluto
+})();
+</script>
+<main class="wrap">
+  <header class="brand"><img src="logo.png" alt="Kalos"></header>
+
+  <section id="card" class="card neutral loading">
+    <div class="status"><span class="dot"></span><span id="estado">VERIFICANDO…</span></div>
+    <p id="mensaje" class="msg">Consultando la inscripción.</p>
+
+    <div id="detalle" hidden>
+      <h1 id="nombre" class="name"></h1>
+      <div id="racha" class="racha" hidden>
+        <div class="rtop"><span class="fuego" aria-hidden="true">🔥</span>
+          <div><span id="rNum" class="rnum"></span><span id="rLbl" class="rlbl"></span></div>
+          <span id="rRec" class="rrec"></span></div>
+        <div id="rSem" class="rsem"></div>
+        <p id="rMsg" class="rmsg"></p>
+        <a id="rBtn" class="rbtn" href="#" target="_blank" rel="noopener" hidden></a>
+      </div>
+      <p id="dias" class="days"></p>
+      <div class="bar"><span id="barra"></span></div>
+      <dl class="grid">
+        <div><dt>Desde</dt><dd id="inicio"></dd></div>
+        <div><dt>Hasta</dt><dd id="fin"></dd></div>
+        <div><dt>Plan</dt><dd id="plan"></dd></div>
+        <div><dt>Horario</dt><dd id="horario"></dd></div>
+        <div><dt>Instructor</dt><dd id="instructor"></dd></div>
+        <div><dt>Código</dt><dd id="codigo" class="code"></dd></div>
+      </dl>
+      <button id="btnRutina" class="btn" type="button" hidden>💪 MI RUTINA</button>
+      <button id="btnLogros" class="btn out" type="button">🏆 MIS LOGROS</button>
+      <button id="btnApuntes" class="btn out" type="button">📒 MIS APUNTES</button>
+      <button id="btnAsist" class="btn out" type="button">📅 MI ASISTENCIA</button>
+      <button id="btnFisio" class="btn out" type="button">🩺 FISIOTERAPIA · FISIOTERAPIA ALIADA</button>
+      <button id="btnBuzon" class="btn out" type="button">BUZÓN DE SUGERENCIAS</button>
+      <button id="btnRenovar" class="btn" type="button">RENOVAR MI MES</button>
+      <button id="btnAvisos" class="btn out" type="button" hidden>🔔 ACTIVAR AVISOS</button>
+      <p id="avAvisos" class="aviso"></p>
+      <div id="inst" class="inst" hidden>
+        <button id="btnInstalar" class="btn out" type="button">📲 INSTALAR APP</button>
+        <button id="btnInstNo" class="no" type="button">Ahora no</button>
+      </div>
+      <button id="btnCambiar" class="cambiar" type="button">¿No es tu tarjeta? Cambiar</button>
+    </div>
+    <button id="btnReintentar" class="btn out" type="button" hidden>REINTENTAR</button>
+  </section>
+
+  <section id="logros" class="card pago ok" hidden>
+    <div class="status"><span class="dot"></span>LOGROS</div>
+    <p id="lgCarga" class="msg">Cargando tus logros…</p>
+
+    <div id="lgForm" hidden>
+      <h2 id="lgFormTitulo">Define tus 3 metas</h2>
+      <p id="lgFormHint" class="msg">¿Qué quieres lograr entrenando en Kalos? Escribe 3 metas concretas: cuando las cumplas las marcas y celebramos contigo.</p>
+      <input class="lginp" maxlength="60" placeholder="Ej: 20 flexiones seguidas" aria-label="Meta 1">
+      <input class="lginp" maxlength="60" placeholder="Ej: 10 dominadas" aria-label="Meta 2">
+      <input class="lginp" maxlength="60" placeholder="Ej: Mantener un L-sit 15 segundos" aria-label="Meta 3">
+      <p id="lgAviso" class="aviso" role="status"></p>
+      <button id="btnGuardarMetas" class="btn" type="button">GUARDAR MIS 3 METAS</button>
+      <button id="btnCancelarForm" class="btn sec" type="button" hidden>Cancelar</button>
+    </div>
+
+    <div id="lgLista" hidden>
+      <div class="lgprog"><b id="lgProg"></b><span id="lgRonda"></span></div>
+      <div class="bar" style="margin:10px 0 0"><span id="lgBarra"></span></div>
+      <p id="lgTotal" class="lgtotal"></p>
+      <ul id="lgItems" class="lgs"></ul>
+      <p id="lgAvisoL" class="aviso" role="status"></p>
+      <button id="btnNuevaRonda" class="btn" type="button" hidden>DEFINIR MIS PRÓXIMAS 3 METAS</button>
+      <details id="lgHist" class="hist" hidden><summary>Ver rondas anteriores</summary><div id="lgHistCont"></div></details>
+    </div>
+
+    <button id="btnVolverL" class="btn sec" type="button">Volver</button>
+  </section>
+
+  <section id="apuntes" class="card pago ok" hidden>
+    <div class="status"><span class="dot"></span>MIS APUNTES</div>
+    <h2>MI CUADERNO</h2>
+    <p class="msg" id="apMsg" style="margin-top:0">Anota con qué intensidad y cuántas repeticiones haces cada ejercicio.</p>
+    <div id="apLista">
+      <button id="btnApNuevo" class="btn" type="button">➕ NUEVO APUNTE</button>
+      <input id="apBuscar" class="lginp" type="search" placeholder="Buscar ejercicio…" maxlength="60" autocomplete="off">
+      <div id="apGrupos"></div>
+    </div>
+    <div id="apDetalle" hidden>
+      <h2 id="apTitulo" style="font-size:26px"></h2>
+      <div id="apHist"></div>
+      <button id="btnApOtro" class="btn" type="button">➕ AGREGAR REGISTRO</button>
+      <button id="btnApAtras" class="btn sec" type="button">‹ Todos los ejercicios</button>
+    </div>
+    <div id="apForm" hidden>
+      <h2 id="apFormT" style="font-size:26px">NUEVO APUNTE</h2>
+      <label class="apf" for="apSel">Ejercicio</label>
+      <select id="apSel" class="lginp"></select>
+      <input id="apOtro" class="lginp" type="text" maxlength="60" placeholder="Nombre del ejercicio" hidden>
+      <label class="apf" for="apInt">Intensidad (liga, peso…)</label>
+      <input id="apInt" class="lginp" type="text" maxlength="60" placeholder="Ej: liga verde, 20 kg">
+      <label class="apf" for="apReps">Repeticiones</label>
+      <input id="apReps" class="lginp" type="text" maxlength="40" placeholder="Ej: 8, 3×10, 12-10-8">
+      <label class="apf" for="apFecha">Fecha</label>
+      <input id="apFecha" class="lginp" type="date">
+      <label class="apf" for="apNotas">Notas (opcional)</label>
+      <textarea id="apNotas" class="lginp" rows="3" maxlength="300" placeholder="Cómo te sentiste, técnica, etc."></textarea>
+      <button id="btnApGuardar" class="btn" type="button">GUARDAR</button>
+      <button id="btnApCancelar" class="btn sec" type="button">Cancelar</button>
+    </div>
+    <div id="apAviso" class="aviso"></div>
+    <button id="btnVolverAp" class="btn sec" type="button">Volver</button>
+  </section>
+
+  <section id="fisio" class="card pago ok" hidden>
+    <div class="status"><span class="dot"></span>FISIOTERAPIA</div>
+    <h2>FISIOTERAPIA ALIADA</h2>
+    <p class="msg" style="margin-top:0">Centro de rehabilitación</p>
+    <div class="fdesc">
+      <b>🎁 Descuento especial por ser alumno de Kalos</b>
+      <span>30 % de descuento en sus servicios individuales. Consulta también por el seguro y por el pago anticipado.</span>
+    </div>
+    <a id="btnFiMaps" class="btn out" href="#" target="_blank" rel="noopener" hidden>📍 CÓMO LLEGAR</a>
+    <a id="btnFiWa" class="btn wa" href="#" target="_blank" rel="noopener">💬 ESCRIBIR AL FISIOTERAPEUTA</a>
+    <button id="btnVolverF" class="btn sec" type="button">Volver</button>
+  </section>
+
+
+  <section id="buzon" class="card pago neutral" hidden>
+    <div class="status"><span class="dot"></span>BUZÓN</div>
+    <h2>Déjanos saber tu opinión</h2>
+    <p class="msg">Tu mensaje es <b style="color:#fff">anónimo</b>: no guardamos tu nombre ni tu código. Cuéntanos qué mejorarías o qué te gustaría ver en Kalos.</p>
+    <div id="buzonForm">
+      <textarea id="txtSug" maxlength="500" placeholder="Escribe aquí tu sugerencia…" aria-label="Tu sugerencia"></textarea>
+      <div class="count"><span id="cuenta">0</span>/500</div>
+      <p id="avisoSug" class="aviso" role="status"></p>
+      <button id="btnEnviar" class="btn" type="button">ENVIAR</button>
+    </div>
+    <div id="buzonGracias" hidden>
+      <p class="aviso ok" style="font-size:17px;margin-top:20px">¡Gracias! Tu mensaje llegó al equipo de Kalos.</p>
+    </div>
+    <button id="btnVolverB" class="btn sec" type="button">Volver</button>
+  </section>
+
+  <section id="pago" class="card pago ok" hidden>
+    <div class="status"><span class="dot"></span>RENOVAR</div>
+    <h2>Escanea y paga con tu app del banco</h2>
+    <div id="pgBono" class="fdesc" hidden><b>🎁 Renueva a tiempo y gana 2 días extra</b><span id="pgBonoTxt"></span></div>
+    <div class="qrbox"><img src="qr-pago.png" alt="QR de pago" width="640" height="640"></div>
+    <p class="msg">El QR está a nombre de <b id="pgTitular" style="color:#fff"></b>, no te olvides enviar el comprobante a recepción!</p>
+    <a id="btnWa" class="btn wa" href="#" target="_blank" rel="noopener">ENVIAR COMPROBANTE POR WHATSAPP</a>
+    <button id="btnVolver" class="btn sec" type="button">Volver</button>
+  </section>
+
+  <section id="rutina" class="card pago ok" hidden>
+    <div class="status"><span class="dot"></span>MI RUTINA</div>
+    <p id="rtCarga" class="msg">Cargando tu rutina…</p>
+    <div id="rtCont" hidden>
+      <div id="rtTabs" class="dtabs"></div>
+      <p id="rtNota" class="msg"></p>
+      <div id="rtImgs" class="rimgs"></div>
+    </div>
+    <button id="btnVolverR" class="btn sec" type="button">Volver</button>
+  </section>
+  <div id="lbR" hidden><button id="lbRx" type="button" aria-label="Cerrar">✕</button><img id="lbRImg" alt="Rutina"></div>
+
+  <section id="entrada" class="card pago ok" hidden>
+    <div class="status"><span class="dot"></span>KALOS WORKOUT</div>
+    <div id="enForm">
+      <h2>Encuentra tu tarjeta</h2>
+      <p class="msg">Escribe tu número de celular, el mismo con el que te inscribiste en Kalos.</p>
+      <input id="enTel" class="tel" type="tel" inputmode="numeric" autocomplete="tel" maxlength="20" placeholder="7XXXXXXX" aria-label="Tu número de celular">
+      <p id="enAviso" class="aviso" role="status"></p>
+      <button id="btnEntrar" class="btn" type="button">VER MI TARJETA</button>
+    </div>
+    <div id="enElige" hidden>
+      <h2>¿Quién eres?</h2>
+      <p class="msg">Este celular está registrado en más de un alumno. Toca tu nombre.</p>
+      <div id="enNombres"></div>
+    </div>
+  </section>
+
+  <section id="guia" class="card pago ok" hidden>
+    <div class="status"><span class="dot"></span>INSTALAR APP</div>
+    <h2 id="guiaTitulo">Agrega Kalos a tu pantalla de inicio</h2>
+    <ol id="guiaIos" class="pasos" hidden>
+      <li>Abre esta página en <b>Safari</b> (si estás en WhatsApp o Instagram, toca “Abrir en Safari”).</li>
+      <li>Toca el botón <b>Compartir</b> (el cuadrado con la flecha hacia arriba, abajo en la pantalla).</li>
+      <li>Baja y elige <b>“Agregar a pantalla de inicio”</b>, y luego toca <b>Agregar</b>.</li>
+    </ol>
+    <ol id="guiaAnd" class="pasos" hidden>
+      <li>Abre esta página en <b>Chrome</b>.</li>
+      <li>Toca el menú <b>⋮</b> (arriba a la derecha).</li>
+      <li>Elige <b>“Instalar app”</b> o <b>“Agregar a pantalla de inicio”</b>.</li>
+    </ol>
+    <button id="btnVolverG" class="btn sec" type="button">Volver</button>
+  </section>
+
+  <section id="puerta" class="card pago ok" hidden>
+    <div class="status"><span class="dot"></span>ASISTENCIA</div>
+    <div id="puForm">
+      <h2>Registra tu asistencia</h2>
+      <p class="msg">Escribe tu número de celular, el mismo con el que te inscribiste en Kalos.</p>
+      <input id="puTel" class="tel" type="tel" inputmode="numeric" autocomplete="tel" maxlength="16" placeholder="7XXXXXXX" aria-label="Tu número de celular">
+      <p id="puAviso" class="aviso" role="status"></p>
+      <button id="btnRegistrar" class="btn" type="button">REGISTRAR</button>
+    </div>
+    <div id="puElige" hidden>
+      <h2>¿Quién eres?</h2>
+      <p class="msg">Este celular está registrado en más de un alumno. Toca tu nombre.</p>
+      <div id="puNombres"></div>
+    </div>
+    <div id="puOk" hidden>
+      <h2 id="puTitulo" class="big"></h2>
+      <p id="puNombre" class="name" style="font-size:36px;margin:10px 0 4px"></p>
+      <p id="puCuando" class="days"></p>
+      <div id="puVenc" class="aviso-venc" hidden></div>
+      <div class="stats">
+        <div><b id="puMes">0</b><span>Este mes</span></div>
+        <div><b id="puAnio">0</b><span>Este año</span></div>
+        <div><b id="puRacha">0</b><span>Semanas seguidas</span></div>
+      </div>
+      <button id="btnPuCal" class="btn out" type="button">📅 VER MI CALENDARIO</button>
+      <a id="btnPuWa" class="btn wa" href="#" target="_blank" rel="noopener" hidden>RENOVAR MI MES POR WHATSAPP</a>
+      <button id="btnPuOtro" class="btn sec" type="button">No soy yo / cambiar número</button>
+    </div>
+  </section>
+
+  <section id="asistencia" class="card pago ok" hidden>
+    <div class="status"><span class="dot"></span>ASISTENCIA</div>
+    <h2 id="asTitulo">Mi asistencia</h2>
+    <p id="asCarga" class="msg">Cargando tu calendario…</p>
+    <div id="asCont" hidden>
+      <div class="stats">
+        <div><b id="asMes">0</b><span>Este mes</span></div>
+        <div><b id="asAnio">0</b><span>Este año</span></div>
+        <div><b id="asRacha">0</b><span>Semanas seguidas</span></div>
+      </div>
+      <div class="selmes">
+        <button id="mesAnt" type="button" aria-label="Mes anterior">‹</button>
+        <select id="mesSel" aria-label="Elegir mes"></select>
+        <button id="mesSig" type="button" aria-label="Mes siguiente">›</button>
+      </div>
+      <div id="asMeses" class="meses"></div>
+      <div class="leyenda"><span><b style="background:var(--ok)"></b>Fuiste</span><span><b style="background:#0a1206;border:1px solid var(--line)"></b>No fuiste</span></div>
+    </div>
+    <button id="btnVolverA" class="btn sec" type="button">Volver</button>
+  </section>
+
+  <div id="modal" hidden role="dialog" aria-modal="true">
+    <canvas id="confeti"></canvas>
+    <div class="box">
+      <h2 id="mTitulo"></h2>
+      <p id="mTexto"></p>
+      <div id="mBotones"></div>
+    </div>
+  </div>
+
+  <!-- Reloj en vivo: una captura de pantalla vieja no se mueve -->
+  <p class="clock">Consulta en vivo · <b id="reloj">--:--:--</b></p>
+  <a class="ig" href="https://instagram.com/kalos.workout">@kalos.workout</a>
+</main>
+
+<script>
+  // URL de la Web App de Apps Script (la misma de Config!B4)
+  var APPCFG = window.KALOS_CONFIG || {};
+  try { document.getElementById('pgTitular').textContent = APPCFG.PAYMENT_ACCOUNT_HOLDER || ''; } catch (e) {}
+  var API = APPCFG.API_URL || '';
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function reloj() {
+    var d = new Date();
+    $('reloj').textContent = d.toLocaleDateString('es-BO') + ' ' + d.toLocaleTimeString('es-BO', { hour12: false });
+  }
+  reloj(); setInterval(reloj, 1000);
+
+  function pintar(clase, estado, mensaje) {
+    $('card').className = 'card ' + clase;
+    $('estado').textContent = estado;
+    $('mensaje').textContent = mensaje || '';
+    $('mensaje').hidden = !mensaje;
+  }
+
+
+  var WA = APPCFG.FRONT_DESK_WHATSAPP || '';   // WhatsApp de recepción
+  /* ---- navegación entre pantallas con deslizamiento lateral ---- */
+  var VISTAS = ['card', 'logros', 'buzon', 'pago', 'asistencia', 'puerta', 'entrada', 'guia', 'rutina', 'fisio', 'apuntes'];
+  var SOLO = { entrada: 1, puerta: 1 };
+  var NAV = { cur: 'card', prev: '', pila: [], limpiar: null };
+  var REDUCE = false; try { REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  try { history.scrollRestoration = 'manual'; } catch (e) {}
+
+  function ir(cual, atras, pop) {
+    if (NAV.limpiar) NAV.limpiar();
+    var prev = NAV.cur;
+    if (prev === cual) {
+      VISTAS.forEach(function (k) { $(k).hidden = (k !== cual); });
+      window.scrollTo(0, 0); return;
+    }
+    if (pop) NAV.pila.pop();
+    else if (!atras && prev && !SOLO[cual] && !SOLO[prev]) { NAV.pila.push(prev); try { history.pushState({ v: cual }, ''); } catch (e) {} }
+    else if (SOLO[cual] || SOLO[prev]) NAV.pila = [];
+    NAV.prev = prev; NAV.cur = cual;
+    window.scrollTo(0, 0);
+    var out = $(prev), inn = $(cual);
+    var anim = window.KALOS_SPLASH && !REDUCE && prev !== cual && !out.hidden;
+    VISTAS.forEach(function (k) { if (k !== cual && !(anim && k === prev)) $(k).hidden = true; });
+    if (!anim) { inn.hidden = false; if (prev !== cual) out.hidden = true; return; }
+    var top = out.offsetTop, left = out.offsetLeft, w = out.offsetWidth;
+    out.style.position = 'absolute'; out.style.top = top + 'px'; out.style.left = left + 'px'; out.style.width = w + 'px'; out.style.margin = '0';
+    inn.hidden = false;
+    out.classList.add(atras ? 'sl-sale-der' : 'sl-sale-izq');
+    inn.classList.add(atras ? 'sl-entra-izq' : 'sl-entra-der');
+    var tm = setTimeout(function () { NAV.limpiar && NAV.limpiar(); }, 400);
+    NAV.limpiar = function () {
+      clearTimeout(tm); NAV.limpiar = null;
+      if (NAV.cur !== prev) out.hidden = true;
+      out.removeAttribute('style'); out.classList.remove('sl-sale-izq', 'sl-sale-der');
+      inn.classList.remove('sl-entra-izq', 'sl-entra-der');
+    };
+  }
+
+  function ver(cual) {
+    if (window.splashListo && cual !== 'card') splashListo();
+    if (cual === NAV.cur) { ir(cual, false, false); return; }
+    var top = NAV.pila[NAV.pila.length - 1];
+    if (top === cual) {                       // "Volver": dejamos que el historial del celular haga el regreso
+      var t = setTimeout(function () { if (NAV.cur !== cual) ir(cual, true, true); }, 350);
+      try { history.back(); } catch (e) { clearTimeout(t); ir(cual, true, true); }
+      return;
+    }
+    ir(cual, cual === NAV.prev, false);
+  }
+  window.addEventListener('popstate', function () {
+    if (NAV.pila.length) ir(NAV.pila[NAV.pila.length - 1], true, true);
+  });
+
+  function activarRenovar(nombre) {
+    var texto = 'Hola! Soy ' + nombre + ' y quiero renovar mi mes!';
+    $('btnWa').href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(texto);
+    $('btnRenovar').onclick = function () { ver('pago'); };
+    $('btnVolver').onclick = function () { ver('card'); };
+  }
+
+  var MENSAJES = {
+    vacio: 'Escribe tu mensaje antes de enviar.',
+    largo: 'El mensaje es demasiado largo (máximo 500 caracteres).',
+    limite: 'Ya enviaste varias sugerencias. Vuelve a intentarlo más tarde.',
+    ocupado: 'Hay muchos mensajes en este momento. Intenta de nuevo en un minuto.',
+    invalido: 'No pudimos validar tu tarjeta. Consulta en recepción.'
+  };
+
+  function activarBuzon() {
+    var txt = $('txtSug'), aviso = $('avisoSug'), enviar = $('btnEnviar');
+    function actualizar() { $('cuenta').textContent = txt.value.length; }
+    function decir(clase, t) { aviso.className = 'aviso ' + clase; aviso.textContent = t; }
+    txt.oninput = actualizar;
+    $('btnBuzon').onclick = function () {
+      $('buzonForm').hidden = false; $('buzonGracias').hidden = true;
+      txt.value = ''; actualizar(); decir('', ''); enviar.disabled = false;
+      ver('buzon');
+    };
+    $('btnVolverB').onclick = function () { ver('card'); };
+    enviar.onclick = function () {
+      var msg = txt.value.trim();
+      if (!msg) { decir('bad', MENSAJES.vacio); return; }
+      enviar.disabled = true; decir('', 'Enviando…');
+      // text/plain evita el preflight CORS de Apps Script; el código solo valida la tarjeta
+      fetch(API, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                   body: JSON.stringify({ id: id, msg: msg }) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d && d.ok) {
+            txt.value = ''; $('buzonForm').hidden = true; $('buzonGracias').hidden = false;
+          } else {
+            decir('bad', MENSAJES[d && d.error] || 'No pudimos enviar tu mensaje. Intenta de nuevo.');
+            enviar.disabled = false;
+          }
+        })
+        .catch(function () {
+          decir('bad', 'No pudimos enviar tu mensaje. Revisa tu internet e intenta de nuevo.');
+          enviar.disabled = false;
+        });
+    };
+  }
+
+  /* ===================== LOGROS ===================== */
+  var LG = { est: null, nombre: '', busy: false };
+
+  var LGERR = {
+    invalido: 'No pudimos validar tu tarjeta. Consulta en recepción.',
+    ocupado: 'Hay muchas consultas en este momento. Intenta de nuevo en un minuto.',
+    ronda_abierta: 'Primero completa las metas de tu ronda actual.',
+    metas: 'Escribe las 3 metas.',
+    meta_invalida: 'Cada meta debe tener entre 3 y 60 caracteres y no puede empezar con = + - @.',
+    cerrada: 'Esa ronda ya está cerrada.',
+    no_existe: 'Esa meta ya no está disponible.',
+    logrado: 'Primero desmarca el logro para poder editarlo.'
+  };
+
+  function enviar(body) {
+    body.id = id;
+    return fetch(API, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(body) }).then(function (r) { return r.json(); });
+  }
+
+  function lgDecir(el, clase, t) { el.className = 'aviso ' + clase; el.textContent = t; }
+
+  function activarLogros(nombre) {
+    LG.nombre = nombre;
+    $('btnLogros').onclick = function () { ver('logros'); cargarLogros(); };
+    $('btnVolverL').onclick = function () { ver('card'); };
+    $('btnNuevaRonda').onclick = function () { mostrarForm(LG.est.actual + 1); };
+    $('btnCancelarForm').onclick = function () { pintarLogros(); };
+    $('btnGuardarMetas').onclick = guardarMetas;
+  }
+
+  function cargarLogros() {
+    $('lgForm').hidden = true; $('lgLista').hidden = true;
+    $('lgCarga').hidden = false; $('lgCarga').textContent = 'Cargando tus logros…';
+    enviar({ accion: 'logros_leer' }).then(function (d) {
+      if (d && d.ok) { LG.est = d.estado; pintarLogros(); }
+      else { $('lgCarga').textContent = LGERR[d && d.error] || 'No pudimos cargar tus logros. Intenta de nuevo.'; }
+    }).catch(function () {
+      $('lgCarga').textContent = 'No pudimos cargar tus logros. Revisa tu internet e intenta de nuevo.';
+    });
+  }
+
+  function mostrarForm(ronda) {
+    $('lgCarga').hidden = true; $('lgLista').hidden = true; $('lgForm').hidden = false;
+    $('lgFormTitulo').textContent = ronda === 1 ? 'Define tus 3 metas' : 'Ronda ' + ronda + ': tus próximas 3 metas';
+    $('lgFormHint').textContent = ronda === 1
+      ? '¿Qué quieres lograr entrenando en Kalos? Escribe 3 metas concretas: cuando las cumplas las marcas y celebramos contigo.'
+      : '¡Ya completaste la ronda anterior! Escribe 3 metas nuevas para seguir avanzando.';
+    Array.prototype.forEach.call($('lgForm').querySelectorAll('input'), function (i) { i.value = ''; });
+    lgDecir($('lgAviso'), '', '');
+    $('btnGuardarMetas').disabled = false;
+    $('btnCancelarForm').hidden = ronda === 1;
+    window.scrollTo(0, 0);
+  }
+
+  function guardarMetas() {
+    if (LG.busy) return;
+    var metas = Array.prototype.map.call($('lgForm').querySelectorAll('input'), function (i) { return i.value.trim(); });
+    for (var k = 0; k < metas.length; k++) {
+      if (metas[k].length < 3 || metas[k].length > 60 || /^[=+\-@]/.test(metas[k])) {
+        lgDecir($('lgAviso'), 'bad', 'Escribe las 3 metas (entre 3 y 60 caracteres, sin empezar con = + - @).'); return;
+      }
+    }
+    LG.busy = true; $('btnGuardarMetas').disabled = true; lgDecir($('lgAviso'), '', 'Guardando…');
+    enviar({ accion: 'logros_crear', metas: metas }).then(function (d) {
+      LG.busy = false;
+      if (d && d.ok) { LG.est = d.estado; pintarLogros(); }
+      else { lgDecir($('lgAviso'), 'bad', LGERR[d && d.error] || 'No pudimos guardar tus metas. Intenta de nuevo.'); $('btnGuardarMetas').disabled = false; }
+    }).catch(function () {
+      LG.busy = false; $('btnGuardarMetas').disabled = false;
+      lgDecir($('lgAviso'), 'bad', 'No pudimos guardar. Revisa tu internet e intenta de nuevo.');
+    });
+  }
+
+  function pintarLogros() {
+    var e = LG.est;
+    $('lgCarga').hidden = true;
+    if (!e || !e.actual) { mostrarForm(1); return; }
+    $('lgForm').hidden = true; $('lgLista').hidden = false;
+    var cur = e.rondas[e.rondas.length - 1];
+    var hechas = cur.metas.filter(function (m) { return m.hecho; }).length;
+    $('lgProg').textContent = hechas + ' de ' + cur.metas.length;
+    $('lgRonda').textContent = 'Ronda ' + e.actual;
+    $('lgBarra').style.width = Math.round(hechas / cur.metas.length * 100) + '%';
+    $('lgTotal').textContent = '🏆 ' + e.total + (e.total === 1 ? ' logro conseguido' : ' logros conseguidos') + ' en Kalos';
+    lgDecir($('lgAvisoL'), '', '');
+
+    var ul = $('lgItems'); ul.textContent = '';
+    cur.metas.forEach(function (m) { ul.appendChild(itemLogro(m, true)); });
+    $('btnNuevaRonda').hidden = !e.completa;
+
+    var previas = e.rondas.slice(0, -1).reverse();
+    $('lgHist').hidden = !previas.length;
+    var cont = $('lgHistCont'); cont.textContent = '';
+    previas.forEach(function (r) {
+      var h = document.createElement('h3'); h.textContent = 'Ronda ' + r.ronda; cont.appendChild(h);
+      var l = document.createElement('ul'); l.className = 'lgs'; l.style.marginTop = '0';
+      r.metas.forEach(function (m) { l.appendChild(itemLogro(m, false)); });
+      cont.appendChild(l);
+    });
+  }
+
+  function itemLogro(m, activo) {
+    var li = document.createElement('li'); li.className = 'lg' + (m.hecho ? ' hecho' : '');
+    var chk = document.createElement('button'); chk.type = 'button';
+    chk.textContent = m.hecho ? '✅' : '○';
+    chk.setAttribute('aria-label', m.hecho ? 'Desmarcar logro' : 'Marcar como logrado');
+    var tx = document.createElement('span'); tx.className = 'tx'; tx.textContent = m.texto;
+    li.appendChild(chk); li.appendChild(tx);
+    if (m.hecho && m.logrado) { var f = document.createElement('span'); f.className = 'fch'; f.textContent = m.logrado; li.appendChild(f); }
+    if (!activo) { chk.disabled = true; return li; }
+
+    chk.onclick = function () {
+      if (LG.busy) return;
+      if (m.hecho) {
+        modal({ titulo: '¿Desmarcar este logro?', texto: m.texto, confeti: false, botones: [
+          { t: 'Sí, desmarcar', clase: 'btn', fn: function () { cerrarModal(); cambiarLogro(m, false); } },
+          { t: 'Cancelar', clase: 'btn sec', fn: cerrarModal }
+        ] });
+      } else { cambiarLogro(m, true); }
+    };
+
+    if (!m.hecho) {
+      var ed = document.createElement('button'); ed.type = 'button'; ed.className = 'ed'; ed.textContent = '✏️';
+      ed.setAttribute('aria-label', 'Editar meta');
+      ed.onclick = function () { editarLogro(li, m); };
+      li.appendChild(ed);
+    }
+    return li;
+  }
+
+  function cambiarLogro(m, valor) {
+    if (LG.busy) return;
+    LG.busy = true; lgDecir($('lgAvisoL'), '', 'Guardando…');
+    enviar({ accion: 'logros_marcar', ronda: LG.est.actual, n: m.n, valor: valor }).then(function (d) {
+      LG.busy = false;
+      if (d && d.ok) {
+        LG.est = d.estado; pintarLogros();
+        if (valor) festejar(m.texto, d.estado.completa);
+      } else { lgDecir($('lgAvisoL'), 'bad', LGERR[d && d.error] || 'No pudimos guardar. Intenta de nuevo.'); }
+    }).catch(function () {
+      LG.busy = false; lgDecir($('lgAvisoL'), 'bad', 'No pudimos guardar. Revisa tu internet e intenta de nuevo.');
+    });
+  }
+
+  function editarLogro(li, m) {
+    li.textContent = '';
+    var inp = document.createElement('input'); inp.type = 'text'; inp.maxLength = 60; inp.value = m.texto;
+    inp.setAttribute('aria-label', 'Editar meta');
+    var ok = document.createElement('button'); ok.type = 'button'; ok.textContent = '✔️'; ok.setAttribute('aria-label', 'Guardar');
+    var no = document.createElement('button'); no.type = 'button'; no.textContent = '✖️'; no.setAttribute('aria-label', 'Cancelar');
+    li.appendChild(inp); li.appendChild(ok); li.appendChild(no);
+    inp.focus();
+    no.onclick = pintarLogros;
+    ok.onclick = function () {
+      if (LG.busy) return;
+      var t = inp.value.trim();
+      if (t.length < 3 || t.length > 60 || /^[=+\-@]/.test(t)) { lgDecir($('lgAvisoL'), 'bad', 'La meta debe tener entre 3 y 60 caracteres y no empezar con = + - @.'); return; }
+      LG.busy = true; lgDecir($('lgAvisoL'), '', 'Guardando…');
+      enviar({ accion: 'logros_editar', ronda: LG.est.actual, n: m.n, texto: t }).then(function (d) {
+        LG.busy = false;
+        if (d && d.ok) { LG.est = d.estado; pintarLogros(); }
+        else { lgDecir($('lgAvisoL'), 'bad', LGERR[d && d.error] || 'No pudimos guardar. Intenta de nuevo.'); }
+      }).catch(function () {
+        LG.busy = false; lgDecir($('lgAvisoL'), 'bad', 'No pudimos guardar. Revisa tu internet e intenta de nuevo.');
+      });
+    };
+  }
+
+  /* ---------- festejo ---------- */
+  function festejar(texto, rondaCompleta) {
+    var nombre = (LG.nombre || '').split(' ')[0].toUpperCase();
+    if (rondaCompleta) {
+      var r = LG.est.actual;
+      modal({ titulo: '¡COMPLETASTE LA RONDA ' + r + '! 🏆', texto: 'Lograste las 3 metas. ¡Es hora de ponerte nuevas!', confeti: true, botones: [
+        { t: 'DEFINIR MIS PRÓXIMAS 3 METAS', clase: 'btn', fn: function () { cerrarModal(); mostrarForm(r + 1); } },
+        { t: 'Compartir mi logro', clase: 'btn wa', fn: function () { compartir(texto, true); } },
+        { t: 'Más tarde', clase: 'btn sec', fn: cerrarModal }
+      ] });
+    } else {
+      modal({ titulo: '¡LO LOGRASTE, ' + nombre + '! 💪', texto: texto, confeti: true, botones: [
+        { t: 'Compartir', clase: 'btn wa', fn: function () { compartir(texto, false); } },
+        { t: 'Seguir', clase: 'btn sec', fn: cerrarModal }
+      ] });
+    }
+  }
+
+  function compartir(texto, ronda) {
+    var t = ronda ? '¡Completé mi ronda de metas en Kalos! 🏆💪 @kalos.workout #KalosCalistenia'
+                  : '¡Logré «' + texto + '» entrenando en Kalos! 💪 @kalos.workout #KalosCalistenia';
+    if (navigator.share) { navigator.share({ text: t }).catch(function () {}); }
+    else { window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener'); }
+  }
+
+  function modal(o) {
+    $('mTitulo').textContent = o.titulo; $('mTexto').textContent = o.texto || '';
+    var b = $('mBotones'); b.textContent = '';
+    o.botones.forEach(function (x) {
+      var bt = document.createElement('button'); bt.type = 'button'; bt.className = x.clase; bt.textContent = x.t;
+      if (x.clase === 'btn') bt.style.background = 'var(--ok)';
+      bt.onclick = x.fn; b.appendChild(bt);
+    });
+    $('modal').hidden = false;
+    if (o.confeti) confeti(); else limpiarConfeti();
+  }
+  function cerrarModal() { $('modal').hidden = true; limpiarConfeti(); }
+
+  var confetiTimer = null;
+  function limpiarConfeti() {
+    if (confetiTimer) { cancelAnimationFrame(confetiTimer); confetiTimer = null; }
+    var c = $('confeti'); c.getContext('2d').clearRect(0, 0, c.width, c.height);
+  }
+  function confeti() {
+    limpiarConfeti();
+    var c = $('confeti'), x = c.getContext('2d');
+    c.width = window.innerWidth; c.height = window.innerHeight;
+    var cols = ['#62D97E', '#F2B33D', '#ffffff', '#8A9686', '#FF5A5A'];
+    var ps = [];
+    for (var i = 0; i < 120; i++) ps.push({ x: Math.random() * c.width, y: -20 - Math.random() * c.height * 0.5,
+      w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, v: 2 + Math.random() * 3.5, s: (Math.random() - 0.5) * 2,
+      r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, c: cols[i % cols.length] });
+    var t0 = Date.now();
+    (function paso() {
+      x.clearRect(0, 0, c.width, c.height);
+      ps.forEach(function (p) {
+        p.y += p.v; p.x += p.s; p.r += p.vr;
+        x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore();
+      });
+      if (Date.now() - t0 < 3500) confetiTimer = requestAnimationFrame(paso); else limpiarConfeti();
+    })();
+  }
+
+  /* ===================== ASISTENCIA ===================== */
+  var AS = { volver: 'card', origen: null };
+  var MESES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  var ASERR = {
+    telefono: 'Escribe tu número de celular (8 dígitos).',
+    no_encontrado: 'No encontramos ese número. Revísalo o consulta en recepción.',
+    ocupado: 'Hay muchas consultas en este momento. Intenta de nuevo en un minuto.',
+    invalido: 'No pudimos validar tu tarjeta. Consulta en recepción.',
+    presencia: 'Escanea el código QR de la pantalla de la puerta del gimnasio para continuar. El código cambia cada minuto.'
+  };
+  function guardarTel(t) { try { localStorage.setItem('kalos_tel', t); } catch (e) {} }
+  function leerTel() { try { return localStorage.getItem('kalos_tel') || ''; } catch (e) { return ''; } }
+  function borrarTel() { try { localStorage.removeItem('kalos_tel'); } catch (e) {} }
+
+  function pintarCalendario(d) {
+    AS.d = d;
+    $('asMes').textContent = d.mes; $('asAnio').textContent = d.total; $('asRacha').textContent = d.racha;
+    $('asTitulo').textContent = 'Asistencia ' + d.anio;
+    var sel = $('mesSel'); sel.textContent = '';
+    for (var m = 0; m < 12; m++) {
+      var n = d.dias.filter(function (f) { return Number(f.slice(5, 7)) - 1 === m; }).length;
+      var o = document.createElement('option'); o.value = m;
+      o.textContent = MESES[m].charAt(0) + MESES[m].slice(1).toLowerCase() + ' — ' + n + (n === 1 ? ' día' : ' días');
+      sel.appendChild(o);
+    }
+    sel.onchange = function () { pintarMes(Number(sel.value)); };
+    $('mesAnt').onclick = function () { if (AS.m > 0) pintarMes(AS.m - 1); };
+    $('mesSig').onclick = function () { if (AS.m < 11) pintarMes(AS.m + 1); };
+    $('asCarga').hidden = true; $('asCont').hidden = false;
+    pintarMes(Number(d.hoy.slice(5, 7)) - 1);
+  }
+
+  function pintarMes(m) {
+    var d = AS.d; AS.m = m;
+    $('mesSel').value = m;
+    $('mesAnt').disabled = m === 0; $('mesSig').disabled = m === 11;
+    var set = {}; d.dias.forEach(function (f) { set[f] = true; });
+    var cont = $('asMeses'); cont.textContent = '';
+    var sem = document.createElement('div'); sem.className = 'sem';
+    ['L','M','M','J','V','S','D'].forEach(function (x) { var sp = document.createElement('span'); sp.textContent = x; sem.appendChild(sp); });
+    cont.appendChild(sem);
+    var g = document.createElement('div'); g.className = 'dias';
+    var primero = (new Date(Date.UTC(d.anio, m, 1)).getUTCDay() + 6) % 7;
+    var total = new Date(Date.UTC(d.anio, m + 1, 0)).getUTCDate();
+    for (var v = 0; v < primero; v++) { var e = document.createElement('i'); e.className = 'vacio'; g.appendChild(e); }
+    for (var dia = 1; dia <= total; dia++) {
+      var f = d.anio + '-' + ('0' + (m + 1)).slice(-2) + '-' + ('0' + dia).slice(-2);
+      var c = document.createElement('i'); c.textContent = dia;
+      if (set[f]) c.className = 'asist';
+      else if (f < d.hoy) c.className = 'pasado';
+      if (f === d.hoy) c.className += ' hoy';
+      g.appendChild(c);
+    }
+    cont.appendChild(g);
+  }
+
+  function abrirCalendario(origen, volver) {
+    AS.origen = origen; AS.volver = volver;
+    $('asCont').hidden = true; $('asCarga').hidden = false; $('asCarga').textContent = 'Cargando tu calendario…';
+    ver('asistencia');
+    var body = { accion: 'asistencia_ver' };
+    for (var k in origen) body[k] = origen[k];
+    fetch(API, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && d.ok && d.dias) pintarCalendario(d);
+        else $('asCarga').textContent = ASERR[d && d.error] || 'No pudimos cargar tu calendario. Intenta de nuevo.';
+      })
+      .catch(function () { $('asCarga').textContent = 'No pudimos cargar tu calendario. Revisa tu internet e intenta de nuevo.'; });
+  }
+
+  function activarAsistencia() {
+    $('btnAsist').onclick = function () { abrirCalendario({ id: id }, 'card'); };
+    $('btnVolverA').onclick = function () { ver(AS.volver); };
+  }
+
+  /* ---------- mis apuntes (cuaderno) ---------- */
+  var AP = { items: [], ej: null, ref: null, busy: false };
+  var AP_SUG = ['Dominadas con liga', 'Dominadas sin liga', 'Dominadas negativas', 'Fondos con liga', 'Fondos sin liga', 'Fondos negativos',
+    'Flexiones', 'Flexiones pica', 'Sentadilla c/peso', 'Sentadilla smith', 'Sentadilla búlgara', 'Sentadilla sissy', 'Hip thrust',
+    'Curl bíceps martillo', 'Curl bíceps supino', 'Extensión tríceps polea', 'Extensión tríceps banca plana c/mancuernas'];
+  var AP_ERR = { ejercicio: 'Elige o escribe el ejercicio.', intensidad: 'Escribe la intensidad (liga, peso…).', reps: 'Escribe las repeticiones.',
+    fecha: 'La fecha no es válida.', limite: 'Llegaste al límite de apuntes. Borra algunos antiguos.', ocupado: 'Muchos intentos seguidos. Espera un momento.',
+    no_existe: 'Ese apunte ya no existe.', invalido: 'Tarjeta no válida.' };
+  function apHoy() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function apFecha(f) { var p = String(f).split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : f; }
+  function apCorta(f) { var p = String(f).split('-'); return p.length === 3 ? p[2] + '/' + p[1] : f; }
+  function apClave(n) { return String(n).trim().toLowerCase(); }
+  function apMostrar(cual) {
+    $('apLista').hidden = cual !== 'lista'; $('apDetalle').hidden = cual !== 'detalle'; $('apForm').hidden = cual !== 'form';
+    $('btnVolverAp').hidden = cual !== 'lista'; $('apMsg').hidden = cual !== 'lista'; $('apAviso').textContent = '';
+  }
+  function apGrupos() {
+    var g = {}, orden = [];
+    AP.items.forEach(function (x) { var k = apClave(x.ejercicio); if (!g[k]) { g[k] = []; orden.push(k); } g[k].push(x); });
+    return { g: g, orden: orden };
+  }
+  function apPintarLista() {
+    var cont = $('apGrupos'); while (cont.firstChild) cont.removeChild(cont.firstChild);
+    var q = apClave($('apBuscar').value), r = apGrupos(), n = 0;
+    r.orden.forEach(function (k) {
+      if (q && k.indexOf(q) < 0) return;
+      n++;
+      var ult = r.g[k][0], b = document.createElement('button'); b.type = 'button'; b.className = 'apit';
+      var t = document.createElement('b'); t.textContent = ult.ejercicio;
+      var sp = document.createElement('span'); sp.textContent = ult.intensidad + ' · ' + ult.reps + ' reps · ' + apCorta(ult.fecha) + ' · ' + r.g[k].length + (r.g[k].length === 1 ? ' registro' : ' registros');
+      b.appendChild(t); b.appendChild(sp); b.onclick = function () { apAbrir(k); };
+      cont.appendChild(b);
+    });
+    $('apMsg').textContent = AP.items.length ? 'Toca un ejercicio para ver tu historial.' : 'Aún no tienes apuntes. Anota tu primer ejercicio y empieza a ver tu progreso 💪';
+    $('apBuscar').hidden = !AP.items.length;
+    if (AP.items.length && !n) { var p = document.createElement('p'); p.className = 'msg'; p.textContent = 'Sin resultados.'; cont.appendChild(p); }
+  }
+  function apAbrir(k) {
+    AP.ej = k; var lista = apGrupos().g[k];
+    if (!lista) { AP.ej = null; apPintarLista(); apMostrar('lista'); return; }
+    $('apTitulo').textContent = lista[0].ejercicio;
+    var h = $('apHist'); while (h.firstChild) h.removeChild(h.firstChild);
+    lista.forEach(function (x) {
+      var d = document.createElement('div'); d.className = 'aprow';
+      var f = document.createElement('div'); f.className = 'fe'; f.textContent = apFecha(x.fecha);
+      var i = document.createElement('div'); i.className = 'in'; i.textContent = x.intensidad + ' · ' + x.reps + ' reps';
+      d.appendChild(f); d.appendChild(i);
+      if (x.notas) { var no = document.createElement('div'); no.className = 'no'; no.textContent = x.notas; d.appendChild(no); }
+      var ac = document.createElement('div'); ac.className = 'ac';
+      var e = document.createElement('button'); e.type = 'button'; e.textContent = '✏️ Editar'; e.onclick = function () { apForm(x); };
+      var bo = document.createElement('button'); bo.type = 'button'; bo.textContent = '🗑 Borrar';
+      bo.onclick = function () {
+        if (bo.dataset.ok !== '1') { bo.dataset.ok = '1'; bo.textContent = '¿Seguro? Toca otra vez'; return; }
+        apEnviar({ accion: 'apuntes_borrar', ref: x.ref }, function () { apAbrir(AP.ej); });
+      };
+      ac.appendChild(e); ac.appendChild(bo); d.appendChild(ac); h.appendChild(d);
+    });
+    apMostrar('detalle');
+  }
+  function apForm(x) {
+    AP.ref = x ? x.ref : null;
+    $('apFormT').textContent = x ? 'EDITAR APUNTE' : 'NUEVO APUNTE';
+    var sel = $('apSel'), nombre = x ? x.ejercicio : (AP.ej ? (apGrupos().g[AP.ej] || [{ ejercicio: '' }])[0].ejercicio : '');
+    var enSug = AP_SUG.indexOf(nombre) >= 0;
+    sel.value = nombre ? (enSug ? nombre : '__otro') : '';
+    $('apOtro').hidden = sel.value !== '__otro'; $('apOtro').value = (nombre && !enSug) ? nombre : '';
+    $('apInt').value = x ? x.intensidad : ''; $('apReps').value = x ? x.reps : '';
+    $('apFecha').value = x ? x.fecha : apHoy(); $('apNotas').value = x ? x.notas : '';
+    apMostrar('form');
+  }
+  function apEnviar(body, ok) {
+    if (AP.busy) return; AP.busy = true;
+    enviar(body).then(function (d) {
+      AP.busy = false;
+      if (d && d.ok) { AP.items = d.items || []; apPintarLista(); ok(); }
+      else lgDecir($('apAviso'), 'bad', AP_ERR[d && d.error] || 'No se pudo guardar. Intenta de nuevo.');
+    }).catch(function () { AP.busy = false; lgDecir($('apAviso'), 'bad', 'Sin conexión. Intenta de nuevo.'); });
+  }
+  function activarApuntes() {
+    var sel = $('apSel');
+    if (!sel.options.length) {
+      var o0 = document.createElement('option'); o0.value = ''; o0.textContent = 'Elige un ejercicio…'; sel.appendChild(o0);
+      AP_SUG.forEach(function (n) { var o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o); });
+      var oo = document.createElement('option'); oo.value = '__otro'; oo.textContent = 'Otro (escribir nombre)…'; sel.appendChild(oo);
+      sel.onchange = function () { $('apOtro').hidden = sel.value !== '__otro'; if (!$('apOtro').hidden) $('apOtro').focus(); };
+    }
+    $('btnApuntes').onclick = function () {
+      ver('apuntes'); apMostrar('lista'); AP.ej = null;
+      $('apMsg').textContent = 'Cargando…';
+      enviar({ accion: 'apuntes_leer' }).then(function (d) {
+        if (d && d.ok) { AP.items = d.items || []; apPintarLista(); }
+        else { $('apMsg').textContent = 'No se pudieron cargar tus apuntes.'; }
+      }).catch(function () { $('apMsg').textContent = 'Sin conexión. Intenta de nuevo.'; });
+    };
+    $('btnVolverAp').onclick = function () { ver('card'); };
+    $('apBuscar').oninput = apPintarLista;
+    $('btnApNuevo').onclick = function () { AP.ej = null; apForm(null); };
+    $('btnApOtro').onclick = function () { apForm(null); };
+    $('btnApAtras').onclick = function () { AP.ej = null; apPintarLista(); apMostrar('lista'); };
+    $('btnApCancelar').onclick = function () { if (AP.ej && apGrupos().g[AP.ej]) apAbrir(AP.ej); else apMostrar('lista'); };
+    $('btnApGuardar').onclick = function () {
+      var nom = sel.value === '__otro' ? $('apOtro').value.trim() : sel.value;
+      var body = { accion: AP.ref ? 'apuntes_editar' : 'apuntes_crear', ref: AP.ref, ejercicio: nom, intensidad: $('apInt').value.trim(),
+                   reps: $('apReps').value.trim(), fecha: $('apFecha').value || apHoy(), notas: $('apNotas').value.trim() };
+      if (nom.length < 2) return lgDecir($('apAviso'), 'bad', AP_ERR.ejercicio);
+      if (!body.intensidad) return lgDecir($('apAviso'), 'bad', AP_ERR.intensidad);
+      if (!body.reps) return lgDecir($('apAviso'), 'bad', AP_ERR.reps);
+      apEnviar(body, function () { AP.ej = apClave(nom); apAbrir(AP.ej); });
+    };
+  }
+
+  /* ---------- avisos en el celular (notificaciones) ---------- */
+  var VAPID_PUB = APPCFG.VAPID_PUBLIC_KEY || '';
+  function b64aBytes(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; var r = atob(s), o = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) o[i] = r.charCodeAt(i); return o; }
+  function pushSoportado() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+  function esIOS() { return /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+  function instalada() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
+  function guardarCfgPush(endpoint) {
+    return caches.open('kalos-cfg').then(function (c) {
+      return c.put(new Request(new URL('cfg-push', location.href).href), new Response(JSON.stringify({ api: API, id: id, endpoint: endpoint })));
+    }).catch(function () {});
+  }
+  function avisosBaja() {
+    try {
+      if (!pushSoportado()) return;
+      navigator.serviceWorker.getRegistration().then(function (reg) { return reg && reg.pushManager.getSubscription(); }).then(function (sub) {
+        if (!sub) return;
+        enviar({ accion: 'push_baja', endpoint: sub.endpoint }).catch(function () {});
+        sub.unsubscribe().catch(function () {});
+      }).catch(function () {});
+    } catch (e) {}
+  }
+  function activarAvisos() {
+    var b = $('btnAvisos'), av = $('avAvisos');
+    function pintarBtn(on) { b.textContent = on ? '🔔 AVISOS ACTIVADOS · toca para desactivar' : '🔔 ACTIVAR AVISOS'; b.className = on ? 'btn sec' : 'btn out'; b.dataset.on = on ? '1' : ''; }
+    if (!pushSoportado()) {
+      if (esIOS() && !instalada()) { b.hidden = false; pintarBtn(false); b.onclick = function () { lgDecir(av, '', 'En iPhone, primero instala la app: toca Compartir y luego "Añadir a pantalla de inicio". Ábrela desde ahí y activa los avisos.'); }; }
+      return;
+    }
+    b.hidden = false; pintarBtn(false); lgDecir(av, '', '');
+    navigator.serviceWorker.ready.then(function (reg) {
+      return reg.pushManager.getSubscription().then(function (sub) {
+        if (sub && Notification.permission === 'granted') {
+          pintarBtn(true); guardarCfgPush(sub.endpoint);
+          enviar({ accion: 'push_registrar', endpoint: sub.endpoint }).catch(function () {});   // mantiene el registro al día
+        }
+        b.onclick = function () {
+          lgDecir(av, '', '');
+          if (b.dataset.on) {
+            enviar({ accion: 'push_baja', endpoint: sub && sub.endpoint }).catch(function () {});
+            reg.pushManager.getSubscription().then(function (s) { return s && s.unsubscribe(); }).then(function () { sub = null; pintarBtn(false); lgDecir(av, 'ok', 'Avisos desactivados.'); });
+            return;
+          }
+          if (Notification.permission === 'denied') { lgDecir(av, 'bad', 'Los avisos están bloqueados. Actívalos en los ajustes de tu celular para esta app.'); return; }
+          Notification.requestPermission().then(function (perm) {
+            if (perm !== 'granted') { lgDecir(av, 'bad', 'No diste permiso para los avisos.'); return; }
+            return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64aBytes(VAPID_PUB) }).then(function (s) {
+              sub = s;
+              return enviar({ accion: 'push_registrar', endpoint: s.endpoint }).then(function (d) {
+                if (d && d.ok) { guardarCfgPush(s.endpoint); pintarBtn(true); lgDecir(av, 'ok', '¡Listo! Te avisaremos cuando tu mes esté por vencer y cuando toque entrenar 💪'); }
+                else { s.unsubscribe().catch(function () {}); sub = null; lgDecir(av, 'bad', 'No se pudieron activar los avisos. Intenta de nuevo.'); }
+              });
+            });
+          }).catch(function () { lgDecir(av, 'bad', 'No se pudieron activar los avisos en este celular.'); });
+        };
+      });
+    }).catch(function () { b.hidden = true; });
+  }
+  function pintarBono(a) {
+    var box = $('pgBono'); box.hidden = true;
+    if (a.staff) return;
+    var m = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(String(a.fin || ''));
+    if (a.estado === 'VENCE HOY') { $('pgBonoTxt').textContent = 'Renueva hoy y gana 2 días extra de regalo.'; box.hidden = false; }
+    else if (a.estado === 'POR VENCER' && m) { $('pgBonoTxt').textContent = 'Renueva hasta el ' + m[1] + '/' + m[2] + ' y gana 2 días extra de regalo.'; box.hidden = false; }
+  }
+
+  /* ---------- fisioterapia · Fisioterapia aliada ---------- */
+  var FI = { listo: false };
+  function activarFisio(a) {
+    var txt = 'Hola, soy ' + a.nombre + ', alumno de Kalos Calistenia. Quiero consultar por los servicios de fisioterapia y el descuento para alumnos 💪';
+    $('btnFiWa').href = 'https://wa.me/' + (APPCFG.PHYSIO_WHATSAPP || '') + '?text=' + encodeURIComponent(txt);
+    $('btnFiWa').onclick = function () {
+      try { fetch(API, { method: 'POST', credentials: 'omit', keepalive: true, headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                         body: JSON.stringify({ accion: 'fisio_contacto', id: id }) }).catch(function () {}); } catch (e) {}
+    };
+    $('btnFisio').onclick = function () {
+      if (!FI.listo) {
+        FI.listo = true;
+        if (APPCFG.PHYSIO_MAPS_URL) { $('btnFiMaps').href = APPCFG.PHYSIO_MAPS_URL; $('btnFiMaps').hidden = false; }
+      }
+      ver('fisio');
+    };
+    $('btnVolverF').onclick = function () { ver('card'); };
+  }
+
+  /* ---------- puerta del gimnasio ---------- */
+  function iniciarPuerta() {
+    var inp = $('puTel'), aviso = $('puAviso'), btn = $('btnRegistrar'), PU = { tel: '', busy: false };
+    function decir(c, t) { aviso.className = 'aviso ' + c; aviso.textContent = t; }
+    function mostrar(cual) { ['puForm', 'puElige', 'puOk'].forEach(function (k) { $(k).hidden = (k !== cual); }); window.scrollTo(0, 0); }
+    inp.value = leerTel();
+    ver('puerta'); mostrar('puForm');
+
+    function registrar(sel) {
+      if (PU.busy) return;
+      var tel = inp.value.replace(/\D/g, '');
+      if (tel.length < 8) { decir('bad', ASERR.telefono); return; }
+      PU.busy = true; btn.disabled = true; decir('', 'Registrando…');
+      var body = { accion: 'asistencia_registrar', tel: tel, pt: PT };
+      if (sel !== undefined) body.sel = sel;
+      fetch(API, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          PU.busy = false; btn.disabled = false;
+          if (d && d.ok && d.eleccion) { elegir(d.eleccion); decir('', ''); return; }
+          if (d && d.ok) { PU.tel = tel; SES = String(d.ses || ''); guardarTel(tel); exito(d); return; }
+          decir('bad', ASERR[d && d.error] || 'No pudimos registrar tu asistencia. Intenta de nuevo.');
+        })
+        .catch(function () {
+          PU.busy = false; btn.disabled = false;
+          decir('bad', 'No pudimos registrar. Revisa tu internet e intenta de nuevo.');
+        });
+    }
+
+    function elegir(nombres) {
+      var c = $('puNombres'); c.textContent = '';
+      nombres.forEach(function (n, i) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'btn out'; b.textContent = n;
+        b.onclick = function () { mostrar('puForm'); registrar(i); };
+        c.appendChild(b);
+      });
+      mostrar('puElige');
+    }
+
+    function exito(d) {
+      $('puTitulo').textContent = d.ya ? 'YA REGISTRASTE HOY ✅' : '¡ASISTENCIA REGISTRADA! ✅';
+      $('puNombre').textContent = d.nombre;
+      $('puCuando').textContent = d.fecha + ' · ' + d.hora;
+      $('puMes').textContent = d.mes; $('puAnio').textContent = d.total; $('puRacha').textContent = d.racha;
+      var venc = d.estado === 'VENCIDO' || d.estado === 'VENCE HOY';
+      $('puVenc').hidden = !venc; $('btnPuWa').hidden = !venc;
+      if (venc) {
+        $('puVenc').textContent = d.estado === 'VENCE HOY'
+          ? 'Tu plan vence hoy. ¡Renueva para no perder tu ritmo!'
+          : 'Tu plan está vencido (' + String(d.textoDias || '').toLowerCase() + '). Renueva para seguir entrenando.';
+        $('btnPuWa').href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent('Hola! Soy ' + d.nombre + ' y quiero renovar mi mes!');
+      }
+      mostrar('puOk');
+    }
+
+    btn.onclick = function () { registrar(); };
+    inp.onkeydown = function (e) { if (e.key === 'Enter') registrar(); };
+    $('btnPuCal').onclick = function () { abrirCalendario({ tel: PU.tel, ses: SES }, 'puerta'); };
+    $('btnPuOtro').onclick = function () { borrarTel(); inp.value = ''; decir('', ''); mostrar('puForm'); inp.focus(); };
+    $('btnVolverA').onclick = function () { ver(AS.volver); };
+  }
+
+  /* ---------- app: recordar al alumno ---------- */
+  var ID_FMT = /^KAL-[A-Z0-9]{4,10}$/;
+  function guardarId(x) { try { localStorage.setItem('kalos_id', x); } catch (e) {} }
+  function leerId() { try { return (localStorage.getItem('kalos_id') || '').toUpperCase(); } catch (e) { return ''; } }
+  function borrarId() { try { localStorage.removeItem('kalos_id'); } catch (e) {} }
+
+  /* ---------- app: instalar ---------- */
+  var STANDALONE = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  var IOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var promptInst = null;
+  function instalarOculto() {
+    try { var t = Number(localStorage.getItem('kalos_inst_off') || 0); return !!t && (Date.now() - t) < 7 * 86400000; } catch (e) { return false; }
+  }
+  function mostrarInstalar() { $('inst').hidden = STANDALONE || instalarOculto(); }
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault(); promptInst = e;
+    if (!$('detalle').hidden) mostrarInstalar();
+  });
+  window.addEventListener('appinstalled', function () { $('inst').hidden = true; });
+  $('btnInstalar').onclick = function () {
+    if (promptInst) {
+      var pi = promptInst; promptInst = null;
+      pi.prompt();
+      pi.userChoice.then(function (r) { if (r && r.outcome === 'accepted') $('inst').hidden = true; }).catch(function () {});
+    } else {
+      $('guiaIos').hidden = !IOS; $('guiaAnd').hidden = IOS; ver('guia');
+    }
+  };
+  $('btnInstNo').onclick = function () {
+    try { localStorage.setItem('kalos_inst_off', String(Date.now())); } catch (e) {}
+    $('inst').hidden = true;
+  };
+  $('btnVolverG').onclick = function () { ver('card'); };
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  }
+
+  /* ---------- mi rutina ---------- */
+  var NDIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+  var RT = { dias: null, fechas: null, dia: 1, tok: 0, cache: {} };
+  function diaHoy() {   // 1 = lunes … 5 = viernes; fin de semana = 0 (hora de Bolivia)
+    var w = new Date().toLocaleDateString('en-US', { timeZone: 'America/La_Paz', weekday: 'short' });
+    return { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5 }[w] || 0;
+  }
+  function activarRutina(inst) {
+    var es = String(inst || '').trim().toLowerCase() === 'coach';
+    $('btnRutina').hidden = !es;
+    $('btnRutina').onclick = abrirRutina;
+    $('btnVolverR').onclick = function () { ver('card'); };
+    $('lbRx').onclick = function () { $('lbR').hidden = true; $('lbRImg').removeAttribute('src'); };
+  }
+  function abrirRutina() {
+    ver('rutina'); RT.cache = {};
+    $('rtCarga').hidden = false; $('rtCarga').textContent = 'Cargando tu rutina…'; $('rtCont').hidden = true;
+    enviar({ accion: 'rutina_ver' }).then(function (d) {
+      if (!d || !d.ok) { $('rtCarga').textContent = d && d.error === 'ocupado' ? 'Hay muchas consultas. Intenta de nuevo en un minuto.' : 'No pudimos cargar tu rutina. Intenta de nuevo.'; return; }
+      RT.dias = d.dias; RT.fechas = d.fechas;
+      var hay = d.dias.some(function (x) { return x.length; });
+      if (!hay) { $('rtCarga').textContent = 'Tu instructor aún no cargó tu rutina. En cuanto la suba, aparecerá aquí 💪'; return; }
+      var hoy = diaHoy(), ini = hoy;
+      if (!ini || !d.dias[ini - 1].length) { ini = 0; for (var i = 0; i < 5; i++) if (d.dias[i].length) { ini = i + 1; break; } }
+      RT.hoy = hoy; $('rtCarga').hidden = true; $('rtCont').hidden = false;
+      var tabs = $('rtTabs'); tabs.textContent = '';
+      NDIAS.forEach(function (n, i) {
+        var b = document.createElement('button'); b.type = 'button'; b.textContent = n.charAt(0) === 'M' ? (i === 1 ? 'Ma' : 'Mi') : n.charAt(0);
+        b.setAttribute('aria-label', n); b.dataset.d = String(i + 1);
+        if (hoy === i + 1) b.className = 'hoy';
+        b.onclick = function () { verDiaRutina(i + 1); };
+        tabs.appendChild(b);
+      });
+      verDiaRutina(ini);
+      if (!hoy) { $('rtNota').textContent = 'Hoy es descanso 😴 Esta es tu rutina del ' + NDIAS[ini - 1].toLowerCase() + '.'; }
+    }).catch(function () { $('rtCarga').textContent = 'Sin conexión, intenta de nuevo.'; });
+  }
+  function verDiaRutina(dia) {
+    RT.dia = dia; var tok = ++RT.tok;
+    Array.prototype.forEach.call($('rtTabs').children, function (b) { b.classList.toggle('on', Number(b.dataset.d) === dia); });
+    var lst = RT.dias[dia - 1], c = $('rtImgs'); c.textContent = '';
+    if (RT.hoy) $('rtNota').textContent = lst.length ? NDIAS[dia - 1] + (dia === RT.hoy ? ' · hoy' : '') + ' · actualizada el ' + RT.fechas[dia - 1] : '';
+    if (!lst.length) { var p = document.createElement('p'); p.className = 'msg'; p.textContent = 'Sin rutina cargada para el ' + NDIAS[dia - 1].toLowerCase() + '.'; c.appendChild(p); return; }
+    lst.forEach(function (x) {
+      var ph = document.createElement('p'); ph.className = 'msg'; ph.textContent = 'Cargando imagen…'; c.appendChild(ph);
+      var k = dia + '|' + x.orden;
+      function poner(src) {
+        if (tok !== RT.tok) return;
+        if (!src) { ph.textContent = 'No se pudo cargar la imagen. Revisa tu internet.'; return; }
+        var im = new Image(); im.alt = 'Rutina del ' + NDIAS[dia - 1]; im.src = src;
+        im.onclick = function () { $('lbRImg').src = src; $('lbR').hidden = false; $('lbR').scrollTop = 0; };
+        c.replaceChild(im, ph);
+      }
+      if (RT.cache[k]) { poner(RT.cache[k]); return; }
+      enviar({ accion: 'rutina_img', dia: dia, orden: x.orden }).then(function (d) {
+        if (d && d.ok) { RT.cache[k] = d.data; poner(d.data); } else poner(null);
+      }).catch(function () { poner(null); });
+    });
+  }
+
+  /* ---------- tarjeta ---------- */
+  var IR = new URLSearchParams(location.search).get('ir') || '';
+  var id = (new URLSearchParams(location.search).get('id') || '').trim().toUpperCase();
+  var PUERTA = new URLSearchParams(location.search).has('puerta');
+  var PT = (new URLSearchParams(location.search).get('puerta') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 10);   // prueba de presencia (QR rotativo de la puerta)
+  var SES = '';                                    // recibo del día que entrega el servidor tras un registro válido
+
+  function cargarTarjeta(cid, origen) {
+    id = cid;
+    ver('card');
+    $('card').className = 'card neutral loading';
+    $('estado').textContent = 'VERIFICANDO…';
+    $('mensaje').textContent = 'Consultando la inscripción.'; $('mensaje').hidden = false;
+    $('detalle').hidden = true; $('btnReintentar').hidden = true;
+    // Sin cookies: así no importa cuántas cuentas de Google tenga abiertas el celular. Siempre datos frescos.
+    fetch(API + '?format=json&id=' + encodeURIComponent(cid), { credentials: 'omit', cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (window.splashListo) splashListo();
+        if (d && d.ocupado) {
+          pintar('warn', 'UN MOMENTO', 'Hay muchas consultas en este momento. Intenta de nuevo en un minuto.');
+          $('btnReintentar').hidden = false; $('btnReintentar').onclick = function () { cargarTarjeta(cid, origen); };
+          return;
+        }
+        if (!d || !d.ok) {
+          if (origen !== 'url') { borrarId(); iniciarEntrada('Esa tarjeta ya no existe. Escribe tu celular para encontrar la tuya.'); return; }
+          pintar('bad', 'NO VÁLIDA', 'No encontramos una inscripción con el código ' + cid + '. Consulta en recepción.');
+          return;
+        }
+        var a = d.alumno;
+        guardarId(cid);
+        pintar(a.clase, a.estado, '');
+        $('nombre').textContent = a.nombre;
+        $('dias').textContent = a.staff ? 'STAFF · Kalos' : a.textoDias;
+        pintarRacha(a.racha, a);
+        $('btnRenovar').hidden = !!a.staff;
+        $('barra').parentNode.hidden = !!a.staff;
+        $('inicio').textContent = a.inicio;
+        $('fin').textContent = a.fin;
+        $('plan').textContent = a.plan || '—';
+        $('horario').textContent = a.horario || '—';
+        $('instructor').textContent = a.instructor || '—';
+        $('codigo').textContent = a.id;
+        activarRenovar(a.nombre);
+        activarBuzon();
+        activarLogros(a.nombre);
+        activarAsistencia();
+        activarFisio(a);
+        activarApuntes();
+        activarAvisos();
+        pintarBono(a);
+        $('btnCambiar').onclick = cambiarTarjeta;
+        activarRutina(a.instructor);
+        $('detalle').hidden = false;
+        mostrarInstalar();
+        if (IR === 'renovar' && !a.staff) { IR = ''; try { history.replaceState(null, '', location.pathname + '?app=1'); } catch (e) {} setTimeout(function () { ver('pago'); }, 450); }
+        requestAnimationFrame(function () {
+          $('barra').style.width = Math.max(0, Math.min(100, Number(a.progreso) || 0)) + '%';
+        });
+      })
+      .catch(function () {
+        if (window.splashListo) splashListo();
+        pintar('warn', 'SIN CONEXIÓN', 'Sin conexión, intenta de nuevo.');
+        $('btnReintentar').hidden = false; $('btnReintentar').onclick = function () { cargarTarjeta(cid, origen); };
+      });
+  }
+
+  /* ---------- racha ---------- */
+  function fdm(iso) { return iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) : ''; }
+  function pintarRacha(r, a) {
+    var box = $('racha');
+    if (!r || !r.semana) r = { modo: (r && r.modo) || 'diario', racha: 0, record: (r && r.record) || 0, estado: (r && r.estado) || 'nueva', perdida: null, restaurable: null, bloqueada: false, semana: { dias: [], visitas: 0, necesita: 3, faltan: 3, hoyToca: false } };
+    box.hidden = false;
+    var viva = r.racha > 0;
+    box.className = 'racha ' + (viva ? 'on' : 'off');
+    $('rNum').textContent = r.racha;
+    $('rLbl').textContent = r.racha === 1 ? 'día de racha' : 'días de racha';
+    $('rRec').textContent = r.record > 0 ? 'Récord: ' + r.record : '';
+    var sem = $('rSem'); while (sem.firstChild) sem.removeChild(sem.firstChild);
+    var tres = r.modo === '3x';
+    (r.semana.dias || []).forEach(function (d) {
+      var e = d.e, t = d.l;
+      if (e === 'ok') t += ' ✅'; else if (e === 'falta') { if (tres) e = ''; else t += ' ❌'; } else if (e === 'hoy') t += ' •'; else if (e === 'feriado') t += ' 🎌';
+      var sp = document.createElement('span'); sp.className = e === 'futuro' ? '' : e; sp.textContent = t; sem.appendChild(sp);
+    });
+    var msg = '', cls = '';
+    if (r.estado === 'nueva' || (!viva && r.estado !== 'perdida' && r.estado !== 'riesgo')) msg = '¡Comienza tu racha! 💪 Ve al gimnasio y escanea el QR de la puerta cada vez que entrenes. Solo cuentan lunes a viernes.';
+    else if (r.estado === 'perdida') {
+      cls = 'perdida';
+      msg = r.perdida ? 'Perdiste tu racha de ' + r.perdida.dias + (r.perdida.dias === 1 ? ' día' : ' días') + ' (' + fdm(r.perdida.fecha) + '). ' : '';
+      if (r.restaurable) msg += 'Puedes recuperarla con una penitencia hasta el ' + fdm(r.restaurable.limite) + '.';
+      else if (r.bloqueada) msg += 'Ya usaste tu recuperación de esta semana. Empieza una nueva racha hoy 💪';
+      else msg += 'Empieza una nueva hoy 💪';
+    } else if (r.estado === 'riesgo') {
+      cls = 'riesgo';
+      msg = tres ? '⚠️ Te ' + (r.semana.faltan === 1 ? 'falta 1 día' : 'faltan ' + r.semana.faltan + ' días') + ' esta semana y hoy te toca ir al gym para mantener tu racha.' : '⚠️ Hoy te toca ir al gym para no perder tu racha.';
+    } else if (tres) msg = 'Esta semana: ' + Math.min(r.semana.visitas, r.semana.necesita) + ' de ' + r.semana.necesita + ' días. ' + (r.semana.faltan === 0 ? 'Semana cumplida ✅' : 'Ven ' + r.semana.faltan + (r.semana.faltan === 1 ? ' día más' : ' días más') + ' para mantener tu racha.');
+    else msg = r.semana.hoyToca ? 'Hoy te toca ir al gym.' : 'Tu racha sigue viva. ¡Vamos por más! 🔥';
+    var m = $('rMsg'); m.className = 'rmsg ' + cls; m.textContent = msg;
+    var b = $('rBtn');
+    if (r.restaurable) {
+      var txt = 'Hola, soy ' + a.nombre + ' (' + a.id + '). Perdí mi racha de ' + r.restaurable.prev + ' días el ' + fdm(r.restaurable.desde) + '. Quiero mi penitencia para recuperarla 💪';
+      b.hidden = false; b.textContent = '🔁 RECUPERAR MI RACHA CON PENITENCIA';
+      b.href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(txt);
+    } else { b.hidden = true; b.removeAttribute('href'); }
+  }
+
+  function cambiarTarjeta() {
+    avisosBaja();
+    borrarId(); borrarTel(); id = '';
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    $('detalle').hidden = true;
+    iniciarEntrada('');
+  }
+
+  /* ---------- entrada por celular (si el teléfono no tiene la tarjeta guardada) ---------- */
+  function iniciarEntrada(msg) {
+    var inp = $('enTel'), aviso = $('enAviso'), btn = $('btnEntrar'), busy = false;
+    function decir(c, t) { aviso.className = 'aviso ' + c; aviso.textContent = t; }
+    function mostrar(cual) { ['enForm', 'enElige'].forEach(function (k) { $(k).hidden = (k !== cual); }); window.scrollTo(0, 0); }
+    ver('entrada'); mostrar('enForm');
+    inp.value = leerTel();
+    decir(msg ? 'bad' : '', msg || '');
+
+    function buscar(sel) {
+      if (busy) return;
+      var tel = inp.value.replace(/\D/g, '');
+      if (tel.length < 8) { decir('bad', ASERR.telefono); return; }
+      busy = true; btn.disabled = true; decir('', 'Buscando tu tarjeta…');
+      var body = { accion: 'asistencia_tarjeta', tel: tel, pt: PT };
+      if (sel !== undefined) body.sel = sel;
+      fetch(API, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          busy = false; btn.disabled = false;
+          if (d && d.ok && d.eleccion) { elegir(d.eleccion); decir('', ''); return; }
+          if (d && d.ok && d.id && ID_FMT.test(String(d.id).toUpperCase())) { guardarTel(tel); cargarTarjeta(String(d.id).toUpperCase(), 'tel'); return; }
+          mostrar('enForm');
+          decir('bad', ASERR[d && d.error] || 'No pudimos encontrar tu tarjeta. Intenta de nuevo.');
+        })
+        .catch(function () {
+          busy = false; btn.disabled = false; mostrar('enForm');
+          decir('bad', 'Sin conexión, intenta de nuevo.');
+        });
+    }
+    function elegir(nombres) {
+      var c = $('enNombres'); c.textContent = '';
+      nombres.forEach(function (n, i) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'btn out'; b.textContent = n;
+        b.onclick = function () { mostrar('enForm'); buscar(i); };
+        c.appendChild(b);
+      });
+      mostrar('enElige');
+    }
+    btn.onclick = function () { buscar(); };
+    inp.onkeydown = function (e) { if (e.key === 'Enter') buscar(); };
+  }
+
+  /* ---------- arranque ---------- */
+  if (PUERTA) {
+    iniciarPuerta();
+  } else if (id) {
+    cargarTarjeta(id, 'url');
+  } else {
+    var guardado = leerId();
+    if (ID_FMT.test(guardado)) {
+      cargarTarjeta(guardado, 'guardado');
+    } else {
+      var t = leerTel();
+      if (t.length >= 8 && !PT) {
+        iniciarEntrada(ASERR.presencia);          // sin el código de la puerta no se puede vincular la tarjeta por celular
+      } else if (t.length >= 8) {
+        // ya marcó asistencia en este celular: encontramos su tarjeta sin preguntar
+        $('card').className = 'card neutral loading'; $('estado').textContent = 'VERIFICANDO…';
+        fetch(API, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ accion: 'asistencia_tarjeta', tel: t, pt: PT }) })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d && d.ok && d.id && ID_FMT.test(String(d.id).toUpperCase())) cargarTarjeta(String(d.id).toUpperCase(), 'tel');
+            else iniciarEntrada('');          // celular compartido o ya no existe: que lo confirme él
+          })
+          .catch(function () { iniciarEntrada(''); });
+      } else {
+        iniciarEntrada('');
+      }
+    }
+  }
+</script>
+</body>
+</html>

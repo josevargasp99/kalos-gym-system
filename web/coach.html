@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Kalos · Mis alumnos</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="manifest" href="manifest-coach.webmanifest">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Kalos Coach">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0D1708;--panel:#121e0d;--line:#24321e;--sage:#8A9686;--ok:#62D97E;--warn:#F2B33D;--bad:#FF5A5A;--text:#fff;--muted:#8A9686}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif;min-height:100%}
+    body{display:flex;justify-content:center;min-height:100vh}
+    .wrap{width:100%;max-width:480px;padding:24px 16px 40px;background:radial-gradient(120% 60% at 50% 0%,rgba(138,150,134,.14),transparent 60%)}
+    .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .top img{width:120px;height:auto;display:block}
+    .top span{font:12px Inter,sans-serif;color:var(--muted);letter-spacing:1px}
+    h1{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;font-size:40px;letter-spacing:1.5px;line-height:1}
+    h2{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;font-size:30px;letter-spacing:1.5px;line-height:1.05;margin-top:4px}
+    .sub{color:var(--muted);font-size:14px;line-height:1.5;margin-top:8px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px 18px;position:relative;overflow:hidden;margin-top:16px}
+    .card:before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--ok);box-shadow:0 0 18px var(--ok)}
+    .btn{display:block;width:100%;margin-top:14px;padding:14px 16px;border:0;border-radius:12px;cursor:pointer;font-family:'Bebas Neue',Impact,sans-serif;font-size:21px;letter-spacing:2px;text-align:center;text-decoration:none;background:var(--ok);color:#0D1708}
+    .btn.out{background:transparent;color:var(--ok);border:1.5px solid var(--ok)}
+    .btn.sec{background:transparent;color:var(--sage);border:1px solid var(--line);font-family:Inter,Arial,sans-serif;font-size:14px;letter-spacing:0;padding:12px}
+    .btn.wa{background:#25D366;color:#06210f}
+    .btn.bad{background:transparent;color:var(--bad);border:1px solid var(--bad);font-family:Inter,Arial,sans-serif;font-size:14px;letter-spacing:0;padding:11px}
+    .btn.mini{display:inline-block;width:auto;margin:0;padding:9px 14px;font-size:15px;letter-spacing:1px}
+    .btn:disabled{opacity:.5;cursor:default}
+    input[type=text],input[type=search]{width:100%;margin-top:12px;padding:14px;border-radius:12px;border:1px solid var(--line);background:#0a1206;color:var(--text);font:16px Inter,Arial,sans-serif}
+    input:focus{outline:2px solid var(--sage);border-color:transparent}
+    .aviso{margin-top:12px;font-size:14px;line-height:1.5;min-height:20px;color:var(--muted)}
+    .aviso.bad{color:var(--bad)} .aviso.ok{color:var(--ok)}
+    .row{display:flex;align-items:center;gap:12px;width:100%;margin-top:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:#0a1206;color:var(--text);text-align:left;cursor:pointer;font:inherit}
+    .row .t{flex:1;min-width:0}
+    .row .n{font-weight:600;font-size:16px;word-break:break-word}
+    .row .s{font-size:12px;color:var(--muted);margin-top:3px}
+    .pill{font-size:11px;font-weight:600;letter-spacing:1px;padding:4px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+    .pill.ok{color:var(--ok);border-color:var(--ok)} .pill.warn{color:var(--warn);border-color:var(--warn)} .pill.bad{color:var(--bad);border-color:var(--bad)}
+    .chev{color:var(--muted);font-size:22px}
+    .imgs{display:grid;gap:12px;margin-top:14px}
+    .im{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0a1206}
+    .im img{display:block;width:100%;height:auto;max-height:340px;object-fit:contain;background:#000;cursor:zoom-in}
+    .im .acc{display:flex;gap:8px;padding:10px}
+    .im .acc .btn{margin:0;flex:1}
+    .ph{padding:40px 10px;text-align:center;color:var(--muted);font-size:13px}
+    .chk{display:flex;align-items:center;gap:12px;margin-top:8px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#0a1206;cursor:pointer}
+    .chk input{width:22px;height:22px;accent-color:#62D97E;flex:none}
+    .chk .s{font-size:12px;color:var(--muted)}
+    #apLista h3{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;font-size:22px;letter-spacing:1px;margin:18px 0 0}
+    .box{margin-top:14px;padding:14px;border:1px solid var(--ok);border-radius:14px;color:var(--text);font-size:14px;line-height:1.5}
+    .box.warn{border-color:var(--warn)}
+    #lb{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:50;overflow:auto;touch-action:pan-x pan-y pinch-zoom;-webkit-overflow-scrolling:touch}
+    #lb img{display:block;width:100%;height:auto;min-width:100%}
+    #lbx{position:fixed;top:12px;right:12px;z-index:51;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:22px;cursor:pointer}
+    .tabs{display:flex;gap:8px;margin:0 0 16px}
+    .tabs button{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--muted);font:600 14px Inter,Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;cursor:pointer}
+    .tabs button.on{background:var(--ok);border-color:var(--ok);color:#06210f}
+    .tot{font-family:'Bebas Neue',Impact,sans-serif;font-size:46px;line-height:1;margin:8px 0 4px;color:var(--ok)}
+    .pg{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+    .pg .t{flex:1;min-width:0}.pg .t b{display:block;font-weight:600;word-break:break-word}.pg .t span{color:var(--muted);font-size:12px}
+    .pg em{font-style:normal;font-weight:700;color:var(--ok);white-space:nowrap}
+    .sem{display:flex;align-items:center;gap:8px;margin:6px 0 12px}
+    .sem b{flex:1;text-align:center;font-size:15px}
+    .sem button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--text);font-size:20px;cursor:pointer}
+    .sem button:disabled{opacity:.3}
+    [hidden]{display:none!important}
+    html,body{overflow-x:hidden}
+    .wrap{position:relative;overflow-x:clip}
+    .sl-sale-izq{animation:slOutL .36s cubic-bezier(.4,0,.2,1) forwards}
+    .sl-sale-der{animation:slOutR .36s cubic-bezier(.4,0,.2,1) forwards}
+    .sl-entra-der{animation:slInR .36s cubic-bezier(.2,.8,.2,1) both}
+    .sl-entra-izq{animation:slInL .36s cubic-bezier(.2,.8,.2,1) both}
+    @keyframes slOutL{to{transform:translate3d(-105%,0,0);opacity:.2}}
+    @keyframes slOutR{to{transform:translate3d(105%,0,0);opacity:.2}}
+    @keyframes slInR{from{transform:translate3d(105%,0,0);opacity:.2}}
+    @keyframes slInL{from{transform:translate3d(-105%,0,0);opacity:.2}}
+    .btn:active:not(:disabled){transform:scale(.97);transition:transform .08s}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top"><img src="logo.png" alt="Kalos"><span id="quien"></span></div>
+
+  <section id="sLogin" hidden>
+    <h1>PANEL DEL INSTRUCTOR</h1>
+    <p class="sub">Escribe tu clave de acceso. Solo hace falta la primera vez en este celular.</p>
+    <input id="inClave" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Clave" aria-label="Clave de acceso">
+    <p id="avLogin" class="aviso" role="status"></p>
+    <button id="btnClave" class="btn" type="button">ENTRAR</button>
+  </section>
+
+  <section id="sLista" hidden>
+    <div class="tabs"><button type="button" class="tabAl">Mis alumnos</button><button type="button" class="tabPg">Pagos</button></div>
+    <h1>MIS ALUMNOS</h1>
+    <p id="subLista" class="sub"></p>
+    <input id="busca" type="search" placeholder="Buscar alumno…" aria-label="Buscar alumno">
+    <div id="lista"></div>
+    <p id="avLista" class="aviso" role="status"></p>
+  </section>
+
+  <section id="sPagos" hidden>
+    <div class="tabs"><button type="button" class="tabAl">Mis alumnos</button><button type="button" class="tabPg">Pagos</button></div>
+    <h1>MIS PAGOS</h1>
+    <p class="sub">Tu parte de lo que pagan tus alumnos. Se te paga cada lunes lo de la semana anterior.</p>
+    <div class="sem"><button id="semAnt" type="button" aria-label="Semana anterior">‹</button><b id="semTit"></b><button id="semSig" type="button" aria-label="Semana siguiente">›</button></div>
+    <div class="card">
+      <p class="sub" id="pgEtq" style="margin:0"></p>
+      <p class="tot" id="pgTotal"></p>
+      <p id="pgEstado" class="sub" style="margin:0 0 8px"></p>
+      <div id="pgLista"></div>
+    </div>
+    <div class="card" id="pgActualBox" style="margin-top:12px">
+      <p class="sub" style="margin:0">Acumulado esta semana (<span id="pgActRango"></span>)</p>
+      <p style="margin:6px 0 0;font-size:20px;font-weight:700" id="pgActual"></p>
+    </div>
+    <p id="avPg" class="aviso" role="status"></p>
+  </section>
+
+  <section id="sAlumno" hidden>
+    <button id="btnAtras1" class="btn sec" type="button" style="margin-top:0">‹ Mis alumnos</button>
+    <div class="card">
+      <h2 id="alNombre"></h2>
+      <p id="alInfo" class="sub"></p>
+      <p class="sub" style="margin-top:14px">Toca un día para cargar o cambiar su rutina. Se repite todas las semanas hasta que la cambies.</p>
+      <div id="dias"></div>
+      <button id="btnApAl" class="btn out" type="button">📒 VER APUNTES DEL ALUMNO</button>
+    </div>
+  </section>
+
+  <section id="sApuntes" hidden>
+    <button id="btnAtrasAp" class="btn sec" type="button" style="margin-top:0">‹ <span id="apAtrasNom"></span></button>
+    <div class="card">
+      <h2>APUNTES</h2>
+      <p id="apSub" class="sub"></p>
+      <div id="apLista"></div>
+    </div>
+  </section>
+
+  <section id="sDia" hidden>
+    <button id="btnAtras2" class="btn sec" type="button" style="margin-top:0">‹ <span id="atrasNom"></span></button>
+    <div class="card">
+      <h2 id="diaTitulo"></h2>
+      <p id="diaSub" class="sub"></p>
+      <div id="imgs" class="imgs"></div>
+      <button id="btnAgregar" class="btn" type="button">+ AGREGAR IMAGEN</button>
+      <p id="avDia" class="aviso" role="status"></p>
+      <div id="postSubida" hidden>
+        <a id="btnWa" class="btn wa" href="#" target="_blank" rel="noopener">AVISAR POR WHATSAPP</a>
+      </div>
+      <button id="btnCopiar" class="btn out" type="button" hidden>COPIAR A OTROS ALUMNOS</button>
+    </div>
+  </section>
+
+  <section id="sCopiar" hidden>
+    <button id="btnAtras3" class="btn sec" type="button" style="margin-top:0">‹ Volver</button>
+    <div class="card">
+      <h2 id="cpTitulo">Copiar rutina</h2>
+      <p id="cpSub" class="sub"></p>
+      <div id="cpLista"></div>
+      <button id="btnTodos" class="btn sec" type="button">Seleccionar todos</button>
+      <div id="cpConfirma" class="box warn" hidden>
+        <p id="cpConfTxt"></p>
+        <button id="btnReemp" class="btn" type="button">SÍ, REEMPLAZAR</button>
+        <button id="btnNoReemp" class="btn sec" type="button">Cancelar</button>
+      </div>
+      <p id="avCp" class="aviso" role="status"></p>
+      <button id="btnHacerCopia" class="btn" type="button">COPIAR</button>
+      <div id="cpHecho" hidden></div>
+    </div>
+  </section>
+</main>
+
+<div id="lb" hidden><button id="lbx" type="button" aria-label="Cerrar">✕</button><img id="lbImg" alt="Rutina"></div>
+<input id="archivo" type="file" accept="image/*" hidden>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  var APPCFG = window.KALOS_CONFIG || {};
+  var API = APPCFG.API_URL || '';
+  var PAGINA = APPCFG.PAGE_URL || location.origin + location.pathname.replace(/[^/]*$/, '');
+  var NOMBRES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+  var $ = function (id) { return document.getElementById(id); };
+  var S = { clave: '', alumnos: [], al: null, dia: 1, dias: [[], [], [], [], []], fechas: ['', '', '', '', ''], busy: false, ultimoSubido: false };
+  var IMG = {};   // caché de imágenes ya descargadas
+
+  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; }
+  function limpiar(n) { while (n.firstChild) n.removeChild(n.firstChild); }
+  var PANT = ['sLogin', 'sLista', 'sPagos', 'sAlumno', 'sApuntes', 'sDia', 'sCopiar'];
+  var CUR = '', LIMP = null, REDUCE = false;
+  try { REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  function pantalla(k) {
+    if (LIMP) LIMP();
+    var prev = CUR; CUR = k;
+    window.scrollTo(0, 0);
+    var out = prev && prev !== k ? $(prev) : null;
+    var anim = out && !out.hidden && !REDUCE;
+    PANT.forEach(function (x) { if (x !== k && !(anim && x === prev)) $(x).hidden = true; });
+    var inn = $(k); inn.hidden = false;
+    if (anim) {
+      var atras = PANT.indexOf(k) < PANT.indexOf(prev);
+      out.style.position = 'absolute'; out.style.top = out.offsetTop + 'px'; out.style.left = out.offsetLeft + 'px'; out.style.width = out.offsetWidth + 'px'; out.style.margin = '0';
+      out.classList.add(atras ? 'sl-sale-der' : 'sl-sale-izq'); inn.classList.add(atras ? 'sl-entra-izq' : 'sl-entra-der');
+      var tm = setTimeout(function () { LIMP && LIMP(); }, 400);
+      LIMP = function () {
+        clearTimeout(tm); LIMP = null;
+        if (CUR !== prev) out.hidden = true;
+        out.removeAttribute('style'); out.classList.remove('sl-sale-izq', 'sl-sale-der'); inn.classList.remove('sl-entra-izq', 'sl-entra-der');
+      };
+    }
+    if (typeof marcarTabs === 'function') marcarTabs();
+  }
+  function decir(id, clase, t) { var n = $(id); n.className = 'aviso ' + clase; n.textContent = t; }
+
+  var ERR = {
+    clave: 'Clave incorrecta. Revisa el enlace que te pasó el administrador.',
+    ocupado: 'Hay muchas consultas en este momento. Intenta de nuevo en un minuto.',
+    alumno: 'Ese alumno no está asignado a ti.',
+    imagen: 'La imagen no es válida o es muy pesada. Prueba con otra captura.',
+    maximo: 'Ya hay 3 imágenes ese día. Reemplaza o quita una.',
+    no_existe: 'Esa imagen ya no existe.',
+    destinos: 'Elige al menos un alumno.',
+    dia: 'Día no válido.'
+  };
+
+  function api(body) {
+    body.clave = S.clave;
+    return fetch(API, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && d.error === 'clave') { try { localStorage.removeItem('kalos_coach_k'); } catch (e) {} S.clave = ''; }
+        return d || { ok: false, error: 'red' };
+      });
+  }
+  function errTxt(d) { return ERR[d && d.error] || 'No pudimos completarlo. Revisa tu internet e intenta de nuevo.'; }
+
+  /* ---------- acceso ---------- */
+  function iniciar() {
+    var k = '';
+    var m = /[#&]k=([A-Za-z0-9]+)/.exec(location.hash || '');
+    if (m) { k = m[1]; try { localStorage.setItem('kalos_coach_k', k); } catch (e) {} try { history.replaceState(null, '', location.pathname); } catch (e) {} }
+    if (!k) { try { k = localStorage.getItem('kalos_coach_k') || ''; } catch (e) {} }
+    if (k) { S.clave = k; cargarLista(); } else { pantalla('sLogin'); }
+  }
+  $('btnClave').onclick = function () {
+    var k = $('inClave').value.trim();
+    if (k.length < 20) { decir('avLogin', 'bad', 'La clave es más larga. Revisa que esté completa.'); return; }
+    S.clave = k; decir('avLogin', '', 'Entrando…');
+    cargarLista(function (d) { decir('avLogin', 'bad', errTxt(d)); });
+  };
+
+  /* ---------- lista ---------- */
+  function cargarLista(fallo) {
+    pantalla('sLista'); limpiar($('lista')); decir('avLista', '', 'Cargando tus alumnos…'); $('subLista').textContent = '';
+    api({ accion: 'coach_lista' }).then(function (d) {
+      if (!d.ok) { if (d.error === 'clave') { pantalla('sLogin'); if (fallo) fallo(d); else decir('avLogin', 'bad', errTxt(d)); return; } decir('avLista', 'bad', errTxt(d)); return; }
+      S.alumnos = d.alumnos || [];
+      $('quien').textContent = 'Instructor · ' + d.coach;
+      decir('avLista', '', '');
+      pintarLista();
+    }).catch(function () { decir('avLista', 'bad', 'Sin conexión, intenta de nuevo.'); });
+  }
+  function pintarLista() {
+    var q = $('busca').value.trim().toLowerCase();
+    var c = $('lista'); limpiar(c);
+    var lst = S.alumnos.filter(function (a) { return !q || a.nombre.toLowerCase().indexOf(q) >= 0; });
+    $('subLista').textContent = S.alumnos.length + (S.alumnos.length === 1 ? ' alumno asignado' : ' alumnos asignados');
+    if (!lst.length) { c.appendChild(el('p', 'aviso', S.alumnos.length ? 'Sin resultados.' : 'Aún no tienes alumnos asignados.')); return; }
+    lst.forEach(function (a) {
+      var b = el('button', 'row'); b.type = 'button';
+      var t = el('div', 't'); t.appendChild(el('div', 'n', a.nombre));
+      var cargados = (a.cuenta || []).filter(function (x) { return x > 0; }).length;
+      t.appendChild(el('div', 's', (a.prueba ? '🧪 PRUEBA · ' : '') + (a.horario || '—') + ' · ' + cargados + ' de 5 días con rutina'));
+      b.appendChild(t);
+      var clase = a.estado === 'ACTIVO' ? 'ok' : (a.estado === 'POR VENCER' ? 'warn' : 'bad');
+      b.appendChild(el('span', 'pill ' + clase, a.estado));
+      b.appendChild(el('span', 'chev', '›'));
+      b.onclick = function () { abrirAlumno(a); };
+      c.appendChild(b);
+    });
+  }
+  $('busca').oninput = pintarLista;
+
+  /* ---------- pagos ---------- */
+  function bs(n) { n = Number(n) || 0; return 'Bs ' + (n % 1 === 0 ? String(n) : n.toFixed(2)).replace('.', ','); }
+  var PG = { semana: '' };
+  function cargarPagos(sem) {
+    pantalla('sPagos'); decir('avPg', '', 'Cargando…');
+    api({ accion: 'coach_pagos', semana: sem || '' }).then(function (d) {
+      if (!d.ok) { if (d.error === 'clave') { pantalla('sLogin'); decir('avLogin', 'bad', errTxt(d)); return; } decir('avPg', 'bad', errTxt(d)); return; }
+      decir('avPg', '', '');
+      var w = d.semana; PG.semana = w.semana;
+      $('semTit').textContent = (d.esPasada ? 'Semana pasada · ' : d.esActual ? 'Esta semana · ' : 'Semana ') + w.desde + ' – ' + w.hasta;
+      $('semAnt').disabled = !d.hayAnterior; $('semSig').disabled = !d.haySiguiente;
+      $('semAnt').onclick = function () { cargarPagos(d.previa); };
+      $('semSig').onclick = function () { cargarPagos(d.siguiente); };
+      $('pgEtq').textContent = d.esActual ? 'Te corresponde (en curso)' : 'Te corresponde';
+      $('pgTotal').textContent = bs(w.total);
+      var est = d.esActual ? 'Semana en curso: se te paga el lunes.' :
+        w.estado === 'pagado' ? '✅ Pagado el ' + w.liquidado.fecha :
+        w.estado === 'parcial' ? '⚠ Pagado ' + bs(w.liquidado.monto) + ' · falta ' + bs(w.diferencia) :
+        w.estado === 'pendiente' ? '⏳ Pendiente de pago' : 'Sin pagos de alumnos esta semana.';
+      $('pgEstado').textContent = est;
+      var c = $('pgLista'); limpiar(c);
+      w.items.forEach(function (x) {
+        var r = el('div', 'pg'); var t = el('div', 't'); t.appendChild(el('b', '', x.nombre));
+        t.appendChild(el('span', '', x.fecha + ' · ' + x.plan + ' · pagó ' + bs(x.monto)));
+        r.appendChild(t); r.appendChild(el('em', '', bs(x.coach))); c.appendChild(r);
+      });
+      $('pgActualBox').hidden = d.esActual;
+      $('pgActRango').textContent = d.actual.desde + ' – ' + d.actual.hasta;
+      $('pgActual').textContent = bs(d.actual.total) + (d.actual.n ? ' · ' + d.actual.n + (d.actual.n === 1 ? ' pago' : ' pagos') : '');
+      if (d.pendiente > 0 && !d.esActual) decir('avPg', 'warn', 'Tienes ' + bs(d.pendiente) + ' pendientes de pago en total.');
+    }).catch(function () { decir('avPg', 'bad', 'Sin conexión, intenta de nuevo.'); });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.tabAl'), function (b) { b.onclick = function () { pantalla('sLista'); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('.tabPg'), function (b) { b.onclick = function () { cargarPagos(''); }; });
+  function marcarTabs() {
+    Array.prototype.forEach.call(document.querySelectorAll('.tabAl'), function (b) { b.className = 'tabAl' + (!$('sLista').hidden ? ' on' : ''); });
+    Array.prototype.forEach.call(document.querySelectorAll('.tabPg'), function (b) { b.className = 'tabPg' + (!$('sPagos').hidden ? ' on' : ''); });
+  }
+
+
+  /* ---------- alumno ---------- */
+  function abrirAlumno(a) {
+    S.al = a; $('alNombre').textContent = a.nombre; $('alInfo').textContent = (a.plan || '') + ' · ' + (a.horario || '');
+    pantalla('sAlumno'); limpiar($('dias')); $('dias').appendChild(el('p', 'aviso', 'Cargando…'));
+    api({ accion: 'coach_ver', id: a.id }).then(function (d) {
+      if (!d.ok) { limpiar($('dias')); $('dias').appendChild(el('p', 'aviso bad', errTxt(d))); return; }
+      S.dias = d.dias; S.fechas = d.fechas; a.cuenta = d.dias.map(function (x) { return x.length; }); pintarDias();
+    }).catch(function () { limpiar($('dias')); $('dias').appendChild(el('p', 'aviso bad', 'Sin conexión, intenta de nuevo.')); });
+  }
+  function pintarDias() {
+    var c = $('dias'); limpiar(c);
+    NOMBRES.forEach(function (n, i) {
+      var b = el('button', 'row'); b.type = 'button';
+      var t = el('div', 't'); t.appendChild(el('div', 'n', n));
+      var k = S.dias[i].length;
+      t.appendChild(el('div', 's', k ? k + (k === 1 ? ' imagen' : ' imágenes') + ' · actualizada ' + S.fechas[i] : 'Sin rutina'));
+      b.appendChild(t); b.appendChild(el('span', 'chev', '›'));
+      b.onclick = function () { abrirDia(i + 1); };
+      c.appendChild(b);
+    });
+  }
+  $('btnAtras1').onclick = function () { pintarLista(); pantalla('sLista'); };
+  $('btnApAl').onclick = function () {
+    var a = S.al, c = $('apLista'); $('apAtrasNom').textContent = a.nombre; $('apSub').textContent = 'Solo lectura · lo que anota el alumno en su cuaderno.';
+    pantalla('sApuntes'); limpiar(c); c.appendChild(el('p', 'aviso', 'Cargando…'));
+    api({ accion: 'coach_apuntes', id: a.id }).then(function (d) {
+      limpiar(c);
+      if (!d.ok) { c.appendChild(el('p', 'aviso bad', errTxt(d))); return; }
+      if (!d.items.length) { c.appendChild(el('p', 'aviso', 'Este alumno aún no tiene apuntes.')); return; }
+      var g = {}, orden = [];
+      d.items.forEach(function (x) { var k = x.ejercicio.trim().toLowerCase(); if (!g[k]) { g[k] = []; orden.push(k); } g[k].push(x); });
+      orden.forEach(function (k) {
+        c.appendChild(el('h3', '', g[k][0].ejercicio));
+        g[k].forEach(function (x) {
+          var f = x.fecha.split('-'), r = el('div', 'box');
+          r.appendChild(el('div', 's', f.length === 3 ? f[2] + '/' + f[1] + '/' + f[0] : x.fecha));
+          r.appendChild(el('div', 'n', x.intensidad + ' · ' + x.reps + ' reps'));
+          if (x.notas) r.appendChild(el('div', 's', x.notas));
+          c.appendChild(r);
+        });
+      });
+    }).catch(function () { limpiar(c); c.appendChild(el('p', 'aviso bad', 'Sin conexión, intenta de nuevo.')); });
+  };
+  $('btnAtrasAp').onclick = function () { pantalla('sAlumno'); };
+
+  /* ---------- día ---------- */
+  function abrirDia(dia) {
+    S.dia = dia; S.ultimoSubido = false; $('postSubida').hidden = true; decir('avDia', '', '');
+    $('atrasNom').textContent = S.al.nombre; $('diaTitulo').textContent = NOMBRES[dia - 1];
+    pantalla('sDia'); pintarDia();
+  }
+  function clave(dia, orden) { return S.al.id + '|' + dia + '|' + orden; }
+  function pintarDia() {
+    var lst = S.dias[S.dia - 1];
+    $('diaSub').textContent = lst.length ? 'Actualizada el ' + S.fechas[S.dia - 1] + ' · se repite cada ' + NOMBRES[S.dia - 1].toLowerCase() + '.' : 'Aún no hay rutina para este día.';
+    var c = $('imgs'); limpiar(c);
+    lst.forEach(function (x) {
+      var w = el('div', 'im'), ph = el('div', 'ph', 'Cargando imagen…'); w.appendChild(ph);
+      var acc = el('div', 'acc');
+      var r = el('button', 'btn out', 'REEMPLAZAR'); r.type = 'button'; r.onclick = function () { elegir(x.orden); };
+      var q = el('button', 'btn bad', 'Quitar'); q.type = 'button'; q.onclick = function () { quitar(x.orden, q); };
+      acc.appendChild(r); acc.appendChild(q);
+      w.appendChild(acc); c.appendChild(w);
+      cargarImg(S.dia, x.orden, function (src) {
+        if (!src) { ph.textContent = 'No se pudo cargar la imagen.'; return; }
+        var im = new Image(); im.alt = 'Rutina'; im.src = src; im.onclick = function () { zoom(src); };
+        w.replaceChild(im, ph);
+      });
+    });
+    $('btnAgregar').hidden = lst.length >= 3;
+    $('btnAgregar').textContent = lst.length ? '+ AGREGAR OTRA IMAGEN (' + lst.length + ' de 3)' : '+ SUBIR RUTINA';
+    $('btnCopiar').hidden = !lst.length;
+  }
+  function cargarImg(dia, orden, cb) {
+    var k = clave(dia, orden);
+    if (IMG[k]) { cb(IMG[k]); return; }
+    api({ accion: 'coach_img', id: S.al.id, dia: dia, orden: orden }).then(function (d) {
+      if (d.ok) { IMG[k] = d.data; cb(d.data); } else cb(null);
+    }).catch(function () { cb(null); });
+  }
+  function zoom(src) { $('lbImg').src = src; $('lb').hidden = false; $('lb').scrollTop = 0; }
+  $('lbx').onclick = function () { $('lb').hidden = true; $('lbImg').removeAttribute('src'); };
+  $('btnAtras2').onclick = function () { pintarDias(); pantalla('sAlumno'); };
+
+  /* ---------- subir (con compresión en el celular) ---------- */
+  var ordenSubida = 0;
+  function elegir(orden) { ordenSubida = orden || 0; $('archivo').value = ''; $('archivo').click(); }
+  $('btnAgregar').onclick = function () { elegir(0); };
+
+  function comprimir(file) {
+    function dibujar(src, w, h) {
+      var max = 1500, k = Math.min(1, max / Math.max(w, h)), c = document.createElement('canvas');
+      c.width = Math.round(w * k); c.height = Math.round(h * k);
+      var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(src, 0, 0, c.width, c.height);
+      var out = c.toDataURL('image/jpeg', 0.82);
+      if (out.length > 1300000) out = c.toDataURL('image/jpeg', 0.6);
+      return out;
+    }
+    if (window.createImageBitmap) {
+      return createImageBitmap(file).then(function (bm) { var r = dibujar(bm, bm.width, bm.height); if (bm.close) bm.close(); return r; });
+    }
+    return new Promise(function (ok, no) {
+      var u = URL.createObjectURL(file), im = new Image();
+      im.onload = function () { var r = dibujar(im, im.naturalWidth, im.naturalHeight); URL.revokeObjectURL(u); ok(r); };
+      im.onerror = function () { URL.revokeObjectURL(u); no(new Error('img')); };
+      im.src = u;
+    });
+  }
+  $('archivo').onchange = function () {
+    var f = this.files && this.files[0]; if (!f || S.busy) return;
+    if (!/^image\//.test(f.type)) { decir('avDia', 'bad', 'Elige una imagen (captura o foto).'); return; }
+    S.busy = true; decir('avDia', '', 'Preparando la imagen…');
+    comprimir(f).then(function (data) {
+      if (data.length > 1400000) throw new Error('grande');
+      decir('avDia', '', 'Subiendo…');
+      return api({ accion: 'coach_subir', id: S.al.id, dia: S.dia, orden: ordenSubida, data: data }).then(function (d) {
+        S.busy = false;
+        if (!d.ok) { decir('avDia', 'bad', errTxt(d)); return; }
+        IMG[clave(S.dia, d.orden)] = data;
+        S.dias = d.dias; S.fechas = d.fechas; S.al.cuenta = d.dias.map(function (x) { return x.length; });
+        decir('avDia', 'ok', '✅ Rutina guardada. Ya la ve ' + S.al.nombre.split(' ')[0] + ' en su tarjeta.');
+        pintarDia(); mostrarAviso();
+      });
+    }).catch(function () { S.busy = false; decir('avDia', 'bad', 'No pudimos subir la imagen. Revisa tu internet e intenta de nuevo.'); });
+  };
+  function mostrarAviso() {
+    var a = S.al; $('postSubida').hidden = !a.tel;
+    if (a.tel) $('btnWa').href = 'https://wa.me/591' + a.tel + '?text=' + encodeURIComponent('¡Hola ' + a.nombre.split(' ')[0] + '! Tienes rutina nueva en tu tarjeta de Kalos 💪 ' + PAGINA + '?id=' + a.id);
+  }
+
+  function quitar(orden, btn) {
+    if (S.busy) return;
+    if (btn.dataset.sure !== '1') { btn.dataset.sure = '1'; btn.textContent = 'Toca otra vez para quitar'; setTimeout(function () { btn.dataset.sure = ''; btn.textContent = 'Quitar'; }, 3500); return; }
+    S.busy = true; decir('avDia', '', 'Quitando…');
+    api({ accion: 'coach_quitar', id: S.al.id, dia: S.dia, orden: orden }).then(function (d) {
+      S.busy = false;
+      if (!d.ok) { decir('avDia', 'bad', errTxt(d)); return; }
+      delete IMG[clave(S.dia, orden)];
+      S.dias = d.dias; S.fechas = d.fechas; S.al.cuenta = d.dias.map(function (x) { return x.length; });
+      $('postSubida').hidden = true; decir('avDia', 'ok', 'Imagen quitada.'); pintarDia();
+    }).catch(function () { S.busy = false; decir('avDia', 'bad', 'Sin conexión, intenta de nuevo.'); });
+  }
+
+  /* ---------- copiar a otros alumnos ---------- */
+  var SEL = {};
+  $('btnCopiar').onclick = function () {
+    SEL = {}; $('cpHecho').hidden = true; limpiar($('cpHecho')); $('cpConfirma').hidden = true; decir('avCp', '', '');
+    $('btnHacerCopia').hidden = false; $('btnTodos').hidden = false;
+    $('cpTitulo').textContent = 'Copiar rutina del ' + NOMBRES[S.dia - 1].toLowerCase();
+    $('cpSub').textContent = 'De ' + S.al.nombre + ' a los alumnos que marques. Las imágenes se copian: después puedes cambiar cada una por separado.';
+    var c = $('cpLista'); limpiar(c);
+    var otros = S.alumnos.filter(function (a) { return a.id !== S.al.id; });
+    if (!otros.length) c.appendChild(el('p', 'aviso', 'No tienes otros alumnos asignados.'));
+    otros.forEach(function (a) {
+      var l = el('label', 'chk'), i = document.createElement('input'); i.type = 'checkbox';
+      i.onchange = function () { if (i.checked) SEL[a.id] = true; else delete SEL[a.id]; };
+      var t = el('div'); t.appendChild(el('div', 'n', a.nombre));
+      var ya = (a.cuenta || [])[S.dia - 1] > 0;
+      t.appendChild(el('div', 's', ya ? 'Ya tiene rutina este día (se reemplaza)' : 'Sin rutina este día'));
+      l.appendChild(i); l.appendChild(t); c.appendChild(l);
+    });
+    pantalla('sCopiar');
+  };
+  $('btnTodos').onclick = function () {
+    var cs = $('cpLista').querySelectorAll('input[type=checkbox]');
+    var todos = Array.prototype.every.call(cs, function (c) { return c.checked; });
+    var otros = S.alumnos.filter(function (a) { return a.id !== S.al.id; });
+    SEL = {};
+    Array.prototype.forEach.call(cs, function (c, i) { c.checked = !todos; if (!todos) SEL[otros[i].id] = true; });
+  };
+  $('btnAtras3').onclick = function () { pantalla('sDia'); pintarDia(); };
+  function copiar(reemplazar) {
+    var ids = Object.keys(SEL);
+    if (!ids.length) { decir('avCp', 'bad', ERR.destinos); return; }
+    if (S.busy) return;
+    S.busy = true; $('cpConfirma').hidden = true; decir('avCp', '', 'Copiando…');
+    api({ accion: 'coach_copiar', id: S.al.id, dia: S.dia, destinos: ids, reemplazar: !!reemplazar }).then(function (d) {
+      S.busy = false;
+      if (!d.ok) { decir('avCp', 'bad', errTxt(d)); return; }
+      if (d.conflictos) {
+        $('cpConfTxt').textContent = d.conflictos.join(', ') + (d.conflictos.length === 1 ? ' ya tiene' : ' ya tienen') + ' rutina el ' + NOMBRES[S.dia - 1].toLowerCase() + '. ¿La reemplazo por esta?';
+        $('cpConfirma').hidden = false; decir('avCp', '', ''); return;
+      }
+      ids.forEach(function (id) { var a = S.alumnos.filter(function (x) { return x.id === id; })[0]; if (a) { a.cuenta = a.cuenta || [0, 0, 0, 0, 0]; a.cuenta[S.dia - 1] = S.dias[S.dia - 1].length; } });
+      decir('avCp', 'ok', '✅ Rutina copiada a ' + d.copiados + (d.copiados === 1 ? ' alumno.' : ' alumnos.'));
+      $('btnHacerCopia').hidden = true; $('btnTodos').hidden = true; $('cpLista').textContent = '';
+      var h = $('cpHecho'); limpiar(h); h.hidden = false;
+      h.appendChild(el('p', 'sub', 'Avísales por WhatsApp:'));
+      ids.forEach(function (id) {
+        var a = S.alumnos.filter(function (x) { return x.id === id; })[0]; if (!a || !a.tel) return;
+        var l = el('a', 'btn wa', 'Avisar a ' + a.nombre.split(' ')[0]); l.target = '_blank'; l.rel = 'noopener';
+        l.href = 'https://wa.me/591' + a.tel + '?text=' + encodeURIComponent('¡Hola ' + a.nombre.split(' ')[0] + '! Tienes rutina nueva en tu tarjeta de Kalos 💪 ' + PAGINA + '?id=' + a.id);
+        h.appendChild(l);
+      });
+    }).catch(function () { S.busy = false; decir('avCp', 'bad', 'Sin conexión, intenta de nuevo.'); });
+  }
+  $('btnHacerCopia').onclick = function () { copiar(false); };
+  $('btnReemp').onclick = function () { copiar(true); };
+  $('btnNoReemp').onclick = function () { $('cpConfirma').hidden = true; };
+
+  iniciar();
+})();
+</script>
+</body>
+</html>

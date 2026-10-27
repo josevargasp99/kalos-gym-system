@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalos Gym System — live demo</title>
+<meta name="description" content="Interactive demo of a QR membership, attendance-streak and renewal system for a calisthenics gym. Synthetic data only.">
+<style>
+  :root{--bg:#0a0f0a;--card:#121a12;--line:#223022;--fg:#eef3ee;--mut:#93a493;--ac:#3CE86B;--warn:#ffd166;--bad:#ff7b7b;color-scheme:dark}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:0 16px 56px}
+  .wrap{max-width:880px;margin:0 auto}
+  header{padding:40px 0 8px}
+  h1{margin:0 0 6px;font-size:clamp(26px,5vw,40px);letter-spacing:.01em}
+  h1 span{color:var(--ac)}
+  .lead{color:var(--mut);max-width:62ch;margin:0}
+  .tag{display:inline-block;margin-top:14px;border:1px solid var(--line);color:var(--mut);border-radius:999px;padding:3px 12px;font-size:13px}
+  h2{margin:34px 0 12px;font-size:19px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px}
+  .tile b{font-size:16px}
+  .tile p{margin:0;color:var(--mut);font-size:14px;flex:1}
+  a.btn,button.btn{appearance:none;border:1px solid var(--ac);background:transparent;color:var(--ac);border-radius:10px;padding:9px 14px;font:600 14px system-ui;text-align:center;text-decoration:none;cursor:pointer;min-height:40px}
+  a.btn:hover,button.btn:hover{background:rgba(60,232,107,.12)}
+  a.btn:focus-visible,button.btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  table{width:100%;border-collapse:collapse;font-size:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  th{color:var(--mut);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+  tr:last-child td{border-bottom:0}
+  .st{font-weight:700;font-size:12px}.ok{color:var(--ac)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+  .scroll{overflow-x:auto}
+  .note{color:var(--mut);font-size:13px;margin-top:10px}
+  code{background:#0f170f;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:13px}
+  ol{padding-left:20px;color:var(--mut)} ol b{color:var(--fg)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Kalos <span>Gym System</span> — live demo</h1>
+  <p class="lead">A QR membership card, attendance streaks, renewal reminders and an owner dashboard for a calisthenics gym — built on Google Sheets and Apps Script. This demo runs the <b>real server code</b> in your browser against an in-memory sheet of invented students.</p>
+  <span class="tag">Synthetic data · nothing is saved · resets on reload</span>
+</header>
+
+<h2>Try it</h2>
+<div class="grid">
+  <div class="tile"><b>Student card</b><p>The installable app a member sees: status, streak, calendar, goals, renewal flow.</p><a id="goCard" class="btn" href="card/">Open a card ↓</a></div>
+  <div class="tile"><b>Door check-in</b><p>Members check in with their phone number — but only after scanning a QR that rotates every minute.</p><a class="btn" href="door/" target="_blank" rel="noopener">Open the door screen</a><button id="goScan" class="btn" type="button">Simulate scanning it</button></div>
+  <div class="tile"><b>Instructor app</b><p>The coach sees their own students, uploads routines and reads training notes.</p><a class="btn" href="coach/#k=DEMOCOACHKEY0123456789ABC">Open as Coach</a></div>
+  <div class="tile"><b>Owner panel</b><p>Monthly numbers, renewal rate, who didn't come back, new sign-ups and renewals.</p><a class="btn" href="owner/">Open the dashboard</a></div>
+</div>
+
+<h2>Demo students</h2>
+<div class="scroll"><table>
+  <thead><tr><th>Student</th><th>Plan</th><th>Status</th><th>Phone (for check-in)</th><th></th></tr></thead>
+  <tbody id="rows"></tbody>
+</table></div>
+<p class="note">To try check-in: press <b>Simulate scanning it</b>, type one of the phone numbers above, and a streak update appears. Without the rotating code the server answers “scan the door QR first”.</p>
+
+<h2>What to look at</h2>
+<ol>
+  <li><b>Presence proof:</b> the check-in rejects requests without a valid, recent door code (HMAC of a one-minute window).</li>
+  <li><b>Streak logic:</b> only business days count, holidays are skipped, and a 3×/week plan follows weekly rules.</li>
+  <li><b>Owner numbers:</b> revenue split per partner, renewal rate with a 10-day grace window, attendance by hour.</li>
+</ol>
+<p class="note">Source and write-up: see the repository README. Brand name and logo belong to the gym; all people and numbers here are fictional.</p>
+</div>
+
+<script>window.DEMO_HOME = '#';</script>
+<script src="assets/server.js"></script>
+<script>
+(function () {
+  var S = window.DEMO_STUDENTS || [], rows = document.getElementById('rows');
+  var first = null;
+  S.forEach(function (s) {
+    var r = consultar_(s.id), a = r && r.alumno ? r.alumno : {};
+    if (!first && /^(ACTIVO|POR VENCER)$/.test(a.estado || '')) first = s;
+    var tr = document.createElement('tr');
+    function td(t, cls) { var c = document.createElement('td'); c.textContent = t; if (cls) c.className = cls; tr.appendChild(c); return c; }
+    td(s.nombre); td(s.plan);
+    var cl = a.estado === 'ACTIVO' ? 'st ok' : a.estado === 'POR VENCER' || a.estado === 'VENCE HOY' ? 'st warn' : 'st bad';
+    td(a.estado || '—', cl); td(s.tel);
+    var c = document.createElement('td'), l = document.createElement('a');
+    l.className = 'btn'; l.href = 'card/?id=' + encodeURIComponent(s.id); l.textContent = 'Open card';
+    l.style.padding = '5px 10px'; c.appendChild(l); tr.appendChild(c); rows.appendChild(tr);
+  });
+  if (first) document.getElementById('goCard').href = 'card/?id=' + encodeURIComponent(first.id);
+  document.getElementById('goScan').onclick = function () {
+    var t = puertaTokenActual();
+    window.open('card/?puerta=' + encodeURIComponent(t.token), '_blank', 'noopener');
+  };
+})();
+</script>
+</body>
+</html>

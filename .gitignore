@@ -1,0 +1,24 @@
+# Secrets and local config — never commit
+.env
+.env.*
+*.priv
+*.pem
+*.key
+vapid*.json
+config.local.js
+.clasp.json
+.clasprc.json
+credentials*.json
+
+# Data exports (real members' data must never enter this repo)
+*.csv
+*.xlsx
+*.ods
+exports/
+data/
+
+# Tooling
+node_modules/
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store
